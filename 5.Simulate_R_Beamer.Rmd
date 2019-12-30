@@ -1,0 +1,159 @@
+---
+title: "Simulating probabilities in R"
+date: "January 22, 2019"
+author: "SSI - 13200"
+output: beamer_presentation
+---
+
+
+# Exercise
+
+- If we have a deck of cards, and we draw 4 cards randomly (without replacement), what is the probability that at least 1 of those is an ace?
+
+# Mathematic Solution
+
+- As we discussed last time, this is easier to do using the complement
+
+```{r}
+math=1-((48/52)*(47/51)*(46/50)*(45/49))
+math
+```
+
+
+# Using Simulations in R
+- We can use simulation to estimate this. How can we transform this problem into a series of programming steps?
+
+# Step 1: Simulate one deck
+
+```{r}
+deck <- rep(1:13, 4)
+deck
+```
+
+# Step 2: Randomly draw 4 cards
+```{r}
+draw <- sample(deck, 4, replace = FALSE)
+draw
+```
+
+# Step 3: Capture the relevant information
+
+```{r}
+atleast1 <- ifelse(1 %in% draw, 1, 0)
+atleast1
+```
+
+# Step 4: Repeat so many times!
+
+-For this, we will introduce loops
+
+```{r}
+deck <- rep(1:13, 4)
+atleast1 <- rep(NA, 10000)
+
+for (i in 1:10000) {
+    draw <- sample(deck, 4, replace = FALSE)
+    atleast1[i] <- ifelse(1 %in% draw, 1, 0)
+}
+
+mean(atleast1)
+```
+
+
+# Introduction to the De Montmort Problem 
+
+- Imagine you have a pile of the 13 spades cards and another of 13 hearts
+- Assume they are well shuffled, and you turn over one from each pile at the same time
+- What is the probability that none of the cards match?
+
+# To do this in R
+
+- We need a "pile" of hearts and a "pile" of spades
+
+```{r}
+hearts <- sample(1:13, 13)
+spades <- sample(1:13, 13)
+hearts
+spades
+```
+
+# Create an empty "success" vector
+```{r}
+correct <- rep(NA,13)
+correct
+```
+
+# Test if they are the same
+
+```{r}
+for (i in 1:13) {
+  correct[i] <- ifelse(hearts[i] == spades[i], 1, 0)
+  }
+correct
+```
+
+# Sum the number of correct times
+
+```{r}
+n_correct <- sum(correct)
+n_correct
+```
+
+#Before we can do this repeatedly...
+
+- We will store the number of correct times in a vector n_correct:
+
+```{r}
+n_correct <- rep(NA, 10000)
+n_correct[1:100]
+```
+
+#To do this repeatedly... 
+
+- We need a loop within a loop
+
+```{r}
+for (f in 1:10000) {
+  hearts <- sample(1:13, 13)
+  spades <- sample(1:13, 13)
+  correct <- rep(NA,13)
+  
+    for (i in 1:13) {
+      correct[i] <- ifelse(hearts[i] == spades[i], 1, 0)
+    }
+  n_correct[f] <- sum(correct)
+}
+```
+
+# How many times did they match?
+
+```{r}
+table(n_correct)
+```
+
+# What percentage of times did we get 0 correct?
+
+```{r}
+table(n_correct)[1]/10000
+```
+
+- That is an approximation of the probability of getting 0 correct
+
+# Mathematical Solution
+
+- The math is more complicated than we need for this class 
+- The actual solution is .3679
+
+
+#Expected Value
+
+- How many cards should we expect to match?
+
+```{r}
+mean(n_correct)
+```
+
+
+#Exercise
+
+After shuffling a deck of cards, what is the probability that none are in the same place they were before?  How many should we expect to be in the same place they were before?

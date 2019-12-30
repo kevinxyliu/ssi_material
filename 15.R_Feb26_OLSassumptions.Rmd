@@ -1,0 +1,133 @@
+---
+title: "Feb 20 SSI"
+author: "Lauren K. Perez"
+date: "2/20/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# OLS Assumptions
+
+*Start by opening and cleaning the data.  As I've mentioned before, I strongly suggest that you keep this chunk of code running from file to file (or in its own file), so that you can copy and paste it in and then just clean any new variables.  Variables you will need today are md_faminc, costt4_a, pctpell, pctfloan, and debt_md.  I suggest multiplying pctfloan and pctpell by 100 (percentpell <- pctpell\*100) to make the coefficients easier to determine. (You would remove the "\" that shows up in that example command in the .rmd version of the file.  That is there to not end this block of italics.)*
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$percentpell <- data2$pctpell * 100
+data2$percentfloan <- data2$pctfloan * 100
+```
+
+*Run a multivariate regression that uses median family income, total cost, percent of students w/ Pell grants, and the percent of students with federal loans to predict median debt.*
+
+```{r}
+mod <- lm(debt_mdn ~ md_faminc + costt4_a + percentpell + percentfloan, data=data2)
+summary(mod)
+```
+
+Now let's start checking OLS assumptions
+
+## Linearity
+
+To start, let's check if the relationships look to be linear.  You can do this using scatterplots of each pair of variables and/or component-residual plots.  Let's start with scatterplots.
+
+The exampe below is the same as we have done before.  We use the plot() function and list the X variable first, followed by the Y variable.  We can add labels for the axes using the xlab and ylab options, and add an overall title using the main option. The col option lets us change the color of the line, the pch option has to do with whether the dots are hollow or filled in, and the cex option affects the size of the dots.  Finally, the abline draws in the regression line for a bivariate regression between these two.  This may make it easier to check visually for linearity.
+
+*Run the code to create the plot below.* 
+
+```{r}
+plot(data2$md_faminc, data2$debt_mdn,
+     xlab = "Median Family Income ($)",
+     ylab = "Median Student Debt ($)",
+     main = "Scatterplot of Income and Debt w/ Regression Line",
+     col='blue', pch = 16, cex = 0.5, 
+     abline(lm(data2$debt_mdn ~ data2$md_faminc)))
+```
+
+While this does not seem to be a perfectly linear relationship, it is not obviously something other shape (a parabola, etc.). This is generally the main thing we are checking for. As long as the shape is more linear than it is something else (i.e. closer to a line than it is to a parabola, etc.), then we are best off estimating a linear relationship. 
+
+We can also check this using a component-residual plot.  These plot the residuals of one independent variable against the dependent variable.  They also include two lines - a residual line and a best fit line.  If these two lines are very far apart, then that also suggests a linearity issue. Again, they don't have to overlap perfectly (and rarely will), but as long as they are not too far apart, a linear model will usually do okay. 
+
+You will need to install the package "car", which we will use to check a number of the OLS assumptions.  The code for this is install.packages("car"), but you should not put that in your .rmd file or it will try to re-download the package every time you knit and give you errors.  Run that from the console below. 
+
+Next, we can load the cars package and run the component-residual plot for median family income and median student debt.  The function is crPlots().  The first argument that function takes is the name of your regression model.  I have "mod7" there, but you should replace that with the name of the regression model you ran above.  Then you give it the name of the variable that you want to plot the residuals of.  You do not need to give it the dataset - it will know where to get the variable from via the model.  
+
+```{r}
+library(car)
+crPlots(mod, "md_faminc", 
+        xlab = "Median Family Income ($)",
+        ylab = "Component Residuals")
+```
+
+We can see that the residuals line (red) and the best fit line (green) are pretty similar.  This suggests that there is not a substantial linearity concern for this variable. 
+
+*Now use both scatterplots and component-residual plots to check linearity for the other independent variables in the model.*
+
+##  Check Heteroskedasticity
+
+Heteroskedasticity, also spelled heteroscedasticity, is when there is unequal variance in the error terms.  This is a bad thing. (Luckily it has a relatively easy fix.) The opposite of heteroskedasticity is homoskedasticity (or homoscedasticity), which means that the error terms all have (approximately) equal error variance.  This is a good thing and is what we want, as it is one of the OLS assumptions. These are the nouns - if you want to use these an adjective, the proper way to do so is to say that the errors are heteroskedastic or homoskedastic. 
+
+One way to check for heteroskedasticity is to do so visually, through a spread-level plot.  This plots the log of the studentized residuals against the log of the fitted values.  A studentized residual is the quotient that you get from dividing the residual by the (estimate of) the standard deviations of the residuals.  In other words, it attempts to estimate how large each residual is in comparison to the average size of all of the residuals.  The fitted values are the predicted Y values. 
+
+In general, you want to not see a pattern in the residuals.  If there is perfect homoskedasticity, they will be randomly spread throughout the plot.  R's spreadLevelPlot() function also gives you a predicted, linear line and a best fit line.  As before, we want these to be close together.  
+
+To generate this plot, you used the spreadLevelPlot() function and use the name of your regression model as the argument. 
+
+```{r}
+spreadLevelPlot(mod)
+```
+
+From the graph, we can see that the lines do diverge substantially, suggesting that there is an issue of heteroskedasticity.  However, it does appear to be mostly at the extremes of the data. We could solve this by either using robust standard errors (we haven't learned how to do this yet) or potentially by dropping some of those outliers. 
+
+You can also test heteroskedasticity using two different statistical tests.  (There are really more than two, but we will focus on two.)  
+
+The first of these is the Breusch-Pagan test, also called the Breusch-Pagan-Godfrey test.  (Poor Godfrey.)  In this test, the null hypothesis is that there is homoskedasticity, whereas the alternative hypothesis is that there is heteroskedasticity.  Thus, this is one of the few times where we do NOT want to reject the null. It follows a Chi-square distribution, so you will get a Chi-square statistic as well as an associated p-value.  It runs a regression using the independent variables from your model and the squared residuals (in the case of this command in R, the studentized residuals) as the dependent variable.  If none of the slope coefficients are significant, then you can find that the independent variables do not significantly predict the residuals, and therefore do not need to reject the null of homoskedasticity.
+
+```{r}
+lmtest::bptest(mod)
+```
+
+Clearly, we need to reject the null, so this confirms our belief from the graph that there is a heteroskedasticity problem. 
+
+We can further confirm this through the non-constant variance test.  This also does a Breusch-Pagan test, but instead of using the studentized residuals (as above), this is the "original" test, which just uses the squared residuals.  This test is somewhat less robust than the one above, as it relies more heavily on the assumption that the errors are distributed normally. It also (by default) uses the fitted (Y) values to predict residuals, rather than the X values. 
+
+```{r}
+ncvTest(mod)
+```
+
+Again, we clearly need to reject the null, further confirming that there is heteroskedasticity.  We could use something called robust standard errors to try to deal with this (or a few other options), but we will not learn this right now. 
+
+## Normality of the Errors
+
+In order to check the normality of the errors, we can begin by using a kernel density plot of the residuals.  This gives you the "curve" that fits the data.  If the errors are normally distributed, this should look like a normal curve. 
+
+To do this, we use the plot() function, and within that we tell it to plot the density() of the resid() (residuals) of our model.  
+
+```{r}
+plot(density(resid(mod7)))
+```
+
+This looks vaguely normal.  It obviously isn't perfect - it's not totally symmetrical and it is a bit right skewed. But it also isn't terribly far from what we would expect. 
+
+Another way we can check this is to use a "QQ-plot," or one that plots the quantiles of the normal distribution and the quantiles of the studentized residuals.  Think of quantiles as bins on a histogram or other similar set of equally sized groups.  Quartiles are when you have three quantiles that divide the data into four evenly sized groups. Again, you want the dots to be pretty close to the lines.
+
+```{r}
+qqPlot(mod7, main="QQ Plot")
+```
+
+So here, we see that our errors are normally distributed for most of the quantiles, but deviate at the top right. 
+
+
+*Now run a new model, where you regress admission rate (adm_rate), SAT average (sat_avg), faculty salaries (avgfacsal), and undergraduate enrollment (ugds) on cost (costt4_a).  We used this model last time.  Check the OLS assumptions for this model.  You can start with checking for heteroskedasticity and the normality of the errors, since you already checked for linearity above.*

@@ -1,0 +1,367 @@
+---
+title: "Feb 5 SSI II - Bivariate Hypothesis Tests"
+author: "Lauren K. Perez"
+date: "2/5/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# knitr::opts_knit$set(root.dir = "your/file/path") #Either add your working directory here or comment this out
+```
+
+#Data Cleaning
+
+*Use the R chunk below to open the College Scorecard data and clean the necessary variables (turn NULL values to NA, make numeric, etc.). You should do this for the following variables: `debt_mdn`, `control`, `adm_rate`, `preddeg`, `main`. I am opening the data as CSdata (so if you open it as something else, you will need to change the code I give you to reflect that). If you've made a cleaning script, you can just copy and paste from that.*
+
+*Hint: If you are having trouble with the as.numeric() function, especially for debt_mdn, use the table() function to see what other values are not numeric and need to be fixed.*
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+
+# clean up the data
+data2$opeid6[which(data2$opeid6=="NULL")]<-NA
+data2$instnm[which(data2$instnm=="NULL")]<-NA
+data2$city[which(data2$city=="NULL")]<-NA
+data2$stabbr[which(data2$stabbr=="NULL")]<-NA
+data2$accredagency[which(data2$accredagency=="NULL")]<-NA
+data2$hcm2[which(data2$hcm2=="NULL")]<-NA
+data2$main[which(data2$main=="NULL")]<-NA
+data2$numbranch[which(data2$numbranch=="NULL")]<-NA
+data2$preddeg[which(data2$preddeg=="NULL")]<-NA
+data2$highdeg[which(data2$highdeg=="NULL")]<-NA
+data2$control[which(data2$control=="NULL")]<-NA
+data2$menonly[which(data2$menonly=="NULL")]<-NA
+data2$womenonly[which(data2$womenonly=="NULL")]<-NA
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$relaffil[which(data2$relaffil=="NULL")]<-NA
+data2$actcm25[which(data2$actcm25=="NULL")]<-NA
+data2$actcm75[which(data2$actcm75=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_white[which(data2$ugds_white=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_black[which(data2$ugds_black=="NULL")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="NULL")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="NULL")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="NULL")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="NULL")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="NULL")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="NULL")]<-NA
+data2$inexpfte[which(data2$inexpfte=="NULL")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="NULL")]<-NA
+data2$pctpell[which(data2$pctpell=="NULL")]<-NA
+data2$c200_4[which(data2$c200_4=="NULL")]<-NA
+data2$c200_l4[which(data2$c200_l4=="NULL")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="NULL")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="NULL")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="NULL")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="NULL")]<-NA
+data2$pctfloan[which(data2$pctfloan=="NULL")]<-NA
+data2$ug25abv[which(data2$ug25abv=="NULL")]<-NA
+data2$cdr3[which(data2$cdr3=="NULL")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="NULL")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="NULL")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="NULL")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="NULL")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="NULL")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="NULL")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="NULL")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="NULL")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="NULL")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="NULL")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="NULL")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="NULL")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="NULL")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="NULL")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="NULL")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="NULL")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="NULL")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="NULL")]<-NA
+data2$faminc[which(data2$faminc=="NULL")]<-NA
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="NULL")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="NULL")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="NULL")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="NULL")]<-NA
+data2$c100_4[which(data2$c100_4=="NULL")]<-NA
+data2$c100_l4[which(data2$c100_l4=="NULL")]<-NA
+data2$ugds_men[which(data2$ugds_men=="NULL")]<-NA
+data2$ugds_women[which(data2$ugds_women=="NULL")]<-NA
+data2$opeid6[which(data2$opeid6=="PrivacySuppressed")]<-NA
+data2$instnm[which(data2$instnm=="PrivacySuppressed")]<-NA
+data2$city[which(data2$city=="PrivacySuppressed")]<-NA
+data2$stabbr[which(data2$stabbr=="PrivacySuppressed")]<-NA
+data2$accredagency[which(data2$accredagency=="PrivacySuppressed")]<-NA
+data2$hcm2[which(data2$hcm2=="PrivacySuppressedL")]<-NA
+data2$main[which(data2$main=="PrivacySuppressed")]<-NA
+data2$numbranch[which(data2$numbranch=="PrivacySuppressed")]<-NA
+data2$preddeg[which(data2$preddeg=="PrivacySuppressed")]<-NA
+data2$highdeg[which(data2$highdeg=="PrivacySuppressed")]<-NA
+data2$control[which(data2$control=="PrivacySuppressed")]<-NA
+data2$menonly[which(data2$menonly=="PrivacySuppressed")]<-NA
+data2$womenonly[which(data2$womenonly=="PrivacySuppressed")]<-NA
+data2$adm_rate[which(data2$adm_rate=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="PrivacySuppressed")]<-NA
+data2$actcm25[which(data2$actcm25=="PrivacySuppressed")]<-NA
+data2$actcm75[which(data2$actcm75=="PrivacySuppressed")]<-NA
+data2$sat_avg[which(data2$sat_avg=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_white[which(data2$ugds_white=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_black[which(data2$ugds_black=="PrivacySuppressed")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="PrivacySuppressed")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="PrivacySuppressed")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="PrivacySuppressed")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="PrivacySuppressed")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="PrivacySuppressed")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="PrivacySuppressed")]<-NA
+data2$inexpfte[which(data2$inexpfte=="PrivacySuppressed")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$c200_4[which(data2$c200_4=="PrivacySuppressed")]<-NA
+data2$c200_l4[which(data2$c200_l4=="PrivacySuppressed")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="PrivacySuppressed")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="PrivacySuppressed")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="PrivacySuppressed")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$ug25abv[which(data2$ug25abv=="PrivacySuppressed")]<-NA
+data2$cdr3[which(data2$cdr3=="PrivacySuppressed")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="PrivacySuppressed")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="PrivacySuppressed")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="PrivacySuppressed")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="PrivacySuppressed")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="PrivacySuppressed")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="PrivacySuppressed")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="PrivacySuppressed")]<-NA
+data2$faminc[which(data2$faminc=="PrivacySuppressed")]<-NA
+data2$md_faminc[which(data2$md_faminc=="PrivacySuppressed")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="PrivacySuppressed")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="PrivacySuppressed")]<-NA
+data2$c100_4[which(data2$c100_4=="PrivacySuppressed")]<-NA
+data2$c100_l4[which(data2$c100_l4=="PrivacySuppressed")]<-NA
+data2$ugds_men[which(data2$ugds_men=="PrivacySuppressed")]<-NA
+data2$ugds_women[which(data2$ugds_women=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="-2")]<-NA
+data2$preddeg[which(data2$preddeg=="0")]<-NA
+
+# convert data into numerics
+data2$opeid6<-as.numeric(data2$opeid6)
+data2$hcm2<-as.numeric(data2$hcm2)
+data2$main<-as.numeric(data2$main)
+data2$numbranch<-as.numeric(data2$numbranch)
+data2$preddeg<-as.numeric(data2$preddeg)
+data2$highdeg<-as.numeric(data2$highdeg)
+data2$control<-as.numeric(data2$control)
+data2$menonly<-as.numeric(data2$menonly)
+data2$womenonly<-as.numeric(data2$womenonly)
+data2$relaffil<-as.numeric(data2$relaffil)
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$actcm25<-as.numeric(data2$actcm25)
+data2$actcm75<-as.numeric(data2$actcm75)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+data2$ugds<-as.numeric(data2$ugds)
+data2$ugds_white<-as.numeric(data2$ugds_white)
+data2$ugds_black<-as.numeric(data2$ugds_black)
+data2$ugds_hisp<-as.numeric(data2$ugds_hisp)
+data2$ugds_asian<-as.numeric(data2$ugds_asian)
+data2$npt4_pub<-as.numeric(data2$npt4_pub)
+data2$npt4_priv<-as.numeric(data2$npt4_priv)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$tuitionfee_in<-as.numeric(data2$tuitionfee_in)
+data2$tuitionfee_out<-as.numeric(data2$tuitionfee_out)
+data2$tuitfte<-as.numeric(data2$tuitfte)
+data2$inexpfte<-as.numeric(data2$inexpfte)
+data2$avgfacsal<-as.numeric(data2$avgfacsal)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$c200_4<-as.numeric(data2$c200_4)
+data2$c200_l4<-as.numeric(data2$c200_l4)
+data2$ret_ft4<-as.numeric(data2$ret_ft4)
+data2$ret_ftl4<-as.numeric(data2$ret_ftl4)
+data2$ret_pt4<-as.numeric(data2$ret_pt4)
+data2$ret_ptl4<-as.numeric(data2$ret_ptl4)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$ug25abv<-as.numeric(data2$ug25abv)
+data2$cdr3<-as.numeric(data2$cdr3)
+data2$rpy_1yr_rt<-as.numeric(data2$rpy_1yr_rt)
+data2$female_rpy_1yr_rt<-as.numeric(data2$female_rpy_1yr_rt)
+data2$male_rpy_1yr_rt<-as.numeric(data2$male_rpy_1yr_rt)
+data2$rpy_3yr_rt<-as.numeric(data2$rpy_3yr_rt)
+data2$female_rpy_3yr_rt<-as.numeric(data2$female_rpy_3yr_rt)
+data2$male_rpy_3yr_rt<-as.numeric(data2$male_rpy_3yr_rt)
+data2$rpy_5yr_rt<-as.numeric(data2$rpy_5yr_rt)
+data2$female_rpy_5yr_rt<-as.numeric(data2$female_rpy_5yr_rt)
+data2$male_rpy_5yr_rt<-as.numeric(data2$male_rpy_5yr_rt)
+data2$inc_pct_lo<-as.numeric(data2$inc_pct_lo)
+data2$par_ed_pct_1stgen<-as.numeric(data2$par_ed_pct_1stgen)
+data2$inc_pct_m1<-as.numeric(data2$inc_pct_m1)
+data2$inc_pct_m2<-as.numeric(data2$inc_pct_m2)
+data2$inc_pct_h1<-as.numeric(data2$inc_pct_h1)
+data2$inc_pct_h2<-as.numeric(data2$inc_pct_h2)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$grad_debt_mdn<-as.numeric(data2$grad_debt_mdn)
+data2$wdraw_debt_mdn<-as.numeric(data2$wdraw_debt_mdn)
+data2$faminc<-as.numeric(data2$faminc)
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$faminc_ind<-as.numeric(data2$faminc_ind)
+data2$mn_earn_wne_p10<-as.numeric(data2$mn_earn_wne_p10)
+data2$md_earn_wne_p10<-as.numeric(data2$md_earn_wne_p10)
+data2$gt_25k_p10<-as.numeric(data2$gt_25k_p10)
+data2$c100_4<-as.numeric(data2$c100_4)
+data2$c100_l4<-as.numeric(data2$c100_l4)
+data2$ugds_men<-as.numeric(data2$ugds_men)
+data2$ugds_women<-as.numeric(data2$ugds_women)
+```
+
+
+#Difference of Means T-test
+
+*For what type of variables do we use a difference of means test?*
+
+*Start by making a dummy variable for public vs. private, where public schools take a value of 1 and private schools take a value of 0.  You need to use the control variable to do so.  Remember, this variable indicates whether the college is public (coded 1), private non-profit (2), and private for-profit (3).*
+
+```{r}
+data2$public <- ifelse(data2$control == "1",1,0)
+```
+
+Next, we can perform a difference of means test to decide whether students go into significantly more debt at private institutions than public ones. 
+
+*What would be the null and alternative hypotheses?*
+Null Hypothesis: students go into the same amount of debt at private institutions and public ones.
+
+Alternate Hypothesis: Students go into significantly more debt at private institutions than public ones.
+
+To test these hypotheses, we use the t.test() function, below. We call the t.test() function, and then give it the two groups of data we want to test - the median debt variable from the CS data set, where the groups are split by the public dummy that we created within the CS dataset, which is either equivalent to 0 or 1. 
+
+```{r}
+t.test(data2$debt_mdn[data2$public==0],
+       data2$debt_mdn[data2$public==1])
+```
+
+Let's look through this output.  It tells us that it did a two sample t-test at the top.  Then it tells us what data it used. 
+
+The next line gets to the results.  The t-statistic is 16.829, which is pretty large.  The degrees of freedom are also much larger than you'll find on most t-tables, at 3162.2.  The p-value is less than 2.2e-16, or 0.00000000000000022, which is significant at any conventional level of significance.  In other words, there is essentially 0 chance that we would get means this far apart if the two types of schools were the same/were from the same distribution.  Thus, we can reject the null hypothesis and conclude that private school students take out significantly more debt than public school students. 
+
+The output then reminds us what the alternative hypothesis is, confirming what we said above.  
+
+The next line is the confidence interval for the difference between the means.  The sample means we got (in the bottom line) were \$11,922.778 for private schools and \$9,525.635 for public schools.  Therefore, we found that the difference was:
+```{r}
+11922.778-9525.635
+```
+
+However, this difference is the difference between our sample means - so what is the difference between the population means?  The output tells us that we can be 95% confident that the difference between the two population means is somewhere between \$2117.851 and \$2676.434.
+
+(Note: I typed the dollar signs with a backslash first to tell R to consider them dollar signs.  I do this because dollar signs are also the way that you indicate to R that you want to write an equation.  However, if you do not want to write an equation, letting it think you do will make things look funny.)
+
+For example: look at how these look when you knit to the pdf version:
+The difference is between \$2117.851 and \$2676.434 
+vs. 
+The difference is between $2117.851$ and $2676.434$
+
+Equation notation lets you write things like $y=mx+b$, $\frac{2}{3}$ and $\sqrt{n}$ 
+vs.  
+Equation notation lets you write things like y=mx+b, 2/3 and sqrt(n).)
+
+*Now try doing a t-test for median debt by non-profit (both private and public) and for-profit colleges.  You will need to create a nonprofit/forprofit dummy variable (from the control).  What would be the null and alternative hypotheses? Then perform the t-test across these two groups.  Is it significant?  What is the 95% confidence interval for the difference? How would you report these results in sentence form?*
+
+```{r}
+data2$forprofit<-ifelse(data2$control == 3,1,0)
+t.test(data2$debt_mdn[data2$forprofit==0],
+       data2$debt_mdn[data2$forprofit==1])
+```
+
+Next, let's try changing the variable we are taking the mean of, so that we are seeing if there are differences across admission rates for different types of schools. (Note: If you are running low on class time, you may want to skip ahead to chi-squared tests and come back to these two.)
+
+*Perform a t-test for the difference of mean admission rates across public and private schools.  Is the difference significant?*
+```{r}
+t.test(data2$adm_rate[data2$public==1],
+       data2$adm_rate[data2$public==0])
+```
+
+
+*Next, perform a t-test for the difference of mean admission rates across nonprofit and for-profit schools.  Is the difference significant?*
+```{r}
+t.test(data2$adm_rate[data2$forprofit==0],
+       data2$adm_rate[data2$forprofit==1])
+```
+
+
+#Chi-Squared Tests
+
+*For what types of variables do we use a chi-squared test?*
+
+The variable preddeg tells you about the predominant degree offered by each college.  0 means "not classified", 1 means "certificate", 2 means "associate", 3 means "bachelor", and 4 means "graduate".
+
+We want to start by making a two-way frequency table.  We have made one-way (one variable) frequency tables before. For example:
+
+```{r}
+table(data2$preddeg)
+```
+
+This table tells us (among other things) that there are 2,102 schools that predominantly give out bachelor's degrees, but only 292 schools that give out predominantly graduate degrees.  
+
+To make a two-way table, we input a second variable into to the function. 
+
+```{r}
+table(data2$preddeg, data2$public)
+```
+
+I think these are easier to read if the variable with more columns is across the top, so let's switch the variable order to flip this table around. 
+
+```{r}
+table(data2$public, data2$preddeg)
+```
+
+
+So, the top-most row and the left-most column give us are variable values for preddeg and public, respectively.  Thus, the second row is the private colleges and the third row is the public colleges.  Assuming that you do not change "not classified (0)" to missing (you could make an argument for both), the third column is for schools with a value of 1 for preddeg, or schools that predominantly give out associates degrees.  We see that there are 2730 schools that are private and predominantly give out associates degrees, while there are 613 that are public and predominantly give out associates degrees. 
+
+*How many schools are there are give out predominantly bachelor's degrees in the private and public categories?*
+1512+590=2102
+
+The next question is whether there is a relationship between these variables.  It is kind of hard to tell without percentages in each box, but we can see that the modal predominant degree for public schools is an associate's degree, whereas it is certificates for private schools, and more private schools also give out bachelor's degrees than associate's degrees.  This suggests there may be a relationship.  We can use a chi-squared test to confirm. 
+
+```{r}
+chisq.test(data2$public, data2$preddeg, correct=FALSE)
+```
+
+We use the chisq.test() function, and put in the two variables of interest.  We also add the option "correct=FALSE", which may look counterintuitive, but this option turns off something called Yates' Correction for Continuity.  The use of this correction is debated, but either way it is meant for 2x2 comparisons when at least one cell of the table has a particularly small N (<5).  That does not apply, and the correction is not something you need to worry about for this class.  Our sample is large enough and our table has enough values that leaving it on would not actually change the results (see below), but it is probably a better habit to get into of turning it off. 
+
+```{r}
+chisq.test(data2$public, data2$preddeg)
+```
+
+Looking at the results of these, we see that the $X^2$ statistic is 668.78, with 4 degrees of freedom.  The p-value is less than 2.2e-16, meaning that it is significant at any conventional level and we can reject the null hypothesis of no relationship/same distribution across groups. 
+
+*Now make a frequency table and perform a chi-squared test to see if there is a difference in predominant degree depending on whether a school is non-profit or for-profit.*
+```{r}
+table(data2$forprofit,data2$preddeg)
+chisq.test(data2$forprofit,data2$preddeg,correct=FALSE)
+```
+
+*What is the Chi-squared statistic?  Is there a significant relationship between these variables?*
+
+There is a significant relationship between these variables.
+
+*Next, try doing a two-way frequency table for whether a campus is the main campus (`main`) and the predominant degree they offer.  Then do the chi-squared statistic.  Is there a signifcant difference?*
+```{r}
+table(data2$main,data2$preddeg)
+chisq.test(data2$main,data2$preddeg,correct=FALSE)
+```
+
+*Try replicating one of these chi-squared tests by hand, first calculating the expected frequencies for each square and then calculating the chi-squared statistic.  You can do this on paper, or for a bonus challenge, learn how to make a table in R. Assignment 1 had one in it you could start from, or you can read instructions for a few different ways to do it here: https://pandoc.org/MANUAL.html#tables*

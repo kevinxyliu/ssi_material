@@ -1,0 +1,219 @@
+---
+title: "Graphs and Visuals"
+author: "Lauren K. Perez"
+date: "1/14/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Cleaning Data
+
+**Start by opening the College Scorecard data that we used last class.  You'll need to add an R code chunk below.  You should be able to copy the command/file path from last time!**
+```{r}
+library(haven)
+data <- read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+```
+
+
+## Review: Dealing with missing data
+
+Sometimes missing data is obvious.  It may be coded as "Null" or "NA".  We obviously need to change these to NA in R. 
+
+There are other ways of coding missing data that are less obvious.  One frequent way is "999", which can lead to funny outcomes if you do not change it first!  Similarly, some places will code it as negative numbers. In data that was coded in Stata, another common statistical program, missing data is generally denoted with a period.
+
+You should always look at the code book to see if there is missing data that you need to recode as such.  This may also include survey responses such as "No response", "Declined to answer", "Don't know", etc.  This is especially important if you are using the variable as an ordinal or continuous variable (rather than categorical), since these types of answers will usually not have the same underlying meaning as something that increases or decreases from one answer to another.  Even in typical "strongly agree" to "strongly disagree" measures, "neutral" does arguably lie somewhere in the middle, whereas "Don't know" does not. 
+
+If we look at the religious affiliation variable (relaffil), we can see that there are negative numbers.  Looking at the codebook, it tells us that -1 means "Not reported" and -2 means "Not applicable".  For our purposed, we probably want to make both of those missing data.  
+
+We can begin by checking that those are the only negative values and that the others make sense.  There are two ways to do this.  We can use "summary()" to check for the minimum and maximum, and "table()" to get a frequency table of the values. 
+
+```{r}
+summary(data$relaffil)
+table(data$relaffil)
+```
+
+Summary tells us that it is a character object, rather than a numerical one, so we know that is something we will need to change.  We can also see that there are ones coded -2, and ones coded "NULL".
+
+We have already learned how to change the ones that say "NULL".
+
+```{r}
+data$relaffil[which(data$relaffil == "NULL")] <- NA
+```
+
+Looking closely at this code, we see that we are looking at the "relaffil" object in the data frame "data", and we are asking it to take those values which are equivalent to "NULL" and replace them with NA.  
+
+After that, you should be able to use the same code as last time to make the variable numeric. 
+
+```{r}
+data$relaffil <- as.numeric(data$relaffil)
+```
+
+**Now try using summary() and table() again. **
+
+We can see that the minimum is -2, suggesting we still need to fix those values.  The maximum at 105 is okay.  
+
+Looking at the table, we can see that there are 6199 observations that are coded -2, 1 that is coded 22 (American Evangelical Lutheran Church), 3 that are coded 24 (African Methodist Episcopal Zion Church), and 14 that are coded 27 (Assemblies of God Church).  
+
+**If the code 30 is for Roman Catholic, how many Roman Catholic colleges are there?**
+
+There are 251 Roman Catholic colleges.
+
+**Now recode the ones coded as -2 to missing, and use summary() and table() to check that the variable makes sense.**
+```{r}
+data$relaffil[which(data$relaffil == "-2")] <- NA
+```
+
+##Other cleaning
+
+**Now do some of the other cleaning that we did last week, such as dealing with the "NULL" values and making variables numeric.  You should do this for the sat_avg and adm_rate variables.  Then create dummy variables for the three types of colleges (public, private non-profit, and private for-profit) using the original "control" variable. **
+
+```{r}
+data$adm_rate[which(data$adm_rate == "NULL")] <- NA
+data$sat_avg[which(data$sat_avg == "NULL")] <- NA
+data$adm_rate <- as.numeric(data$adm_rate)
+data$sat_avg <- as.numeric(data$sat_avg)
+data$public <- ifelse(data$control == "1",1,0)
+data$private_non_profit <- ifelse(data$control == "2",1,0)
+data$private_for_profit <- ifelse(data$control == "3",1,0)
+```
+
+# Make Graphs
+
+##Histograms
+
+Let's make a histogram of the admission rate variable. 
+
+```{r}
+hist(data2$adm_rate,
+     main = "Admission Rates")
+```
+
+*What does the second line of code do?  Try changing this to "College Admission Rates". What changes?*
+
+Another thing we might want to do is relabel the X-axis, since "data$adm_rate" wouldn't tell people a lot if they weren't working with the data.  The code below adds a line to label the X-axis.  Make sure you understand what the difference between the two histograms is. 
+
+```{r}
+hist(data$adm_rate,
+     main = "Admission Rates",
+     xlab = "Admission Rate")
+```
+
+Another thing we might want to do is to provide information on how the admission rate is measured.  We can do this by adding the units in parentheses after the X-axis label.  However, it might also be easier if we turned the variable into a percentage.  (In other words, where an admission rate of 50% is coded as 50 instead of .5.)  We have already learned how to do this type of transformation of a variable.
+
+**First, transform the variable so that it is a percentage.  Then make another histogram, this time adding "(%)" to the X-axis label.**
+```{r}
+data$adm_rate_per <- 100 * data$adm_rate
+hist(data$adm_rate_per,
+     main = "Admission Rates",
+     xlab = "Admission Rate (%)")
+```
+
+There are other options for adjusting the view of your histogram.  
+
+**Use help to look at the help page for the hist() function for creating histograms.  Look through these options, and try changing at least one more.  You can add these as additional arguments in the function, just as we added the x-axis label.**  While I have put each argument on a new line for the sake of readability, but the only requirement is that they be separated by commas.
+
+```{r}
+hist(data$adm_rate_per,
+     breaks=c(0,10,30,50,70,90,100),
+     main = "Admission Rates",
+     xlab = "Admission Rate (%)")
+```
+
+
+**Try making a histogram of average SAT scores.  Make sure to title it and label the X-axis properly.**
+
+##Bar Graphs
+
+We can also make a bar graph of forprofit vs. nonprofit. 
+
+```{r}
+tab <- table(data$private_for_profit)
+barplot(tab,
+        main = "Frequency of For-Profit vs. Non-Profit Colleges",
+        names.arg=c("Non-profit", "For-Profit"),
+        cex.names = 0.8,
+        ylab = "Frequency")
+```
+
+As you can probably see, the "main" argument is where you give the main title.  The "names.arg" argument is where you supply the names for the columns.  The "cex.names" argument allows you to change the size of the text for the names.  Values below one will make the text smaller, while values above one will make it bigger.  You can try fiddling with this.  The "ylab" argument lets you label the Y-axis. 
+
+**Try making a separate bar graph for private vs. public.**
+```{r}
+barplot(table(data2$public),
+        main="Frequency of Private vs. Public",
+        names.arg=c("Private","Public"),
+        cex.names=0.8,
+        ylab="Frequency")
+```
+
+**Can you figure out how to make a bar graph that shows all three types?**
+
+If you have longer names, you can split these onto multiple lines by adding a new line ("\n") character.  For example, you could write "Private\nFor-Profit".  
+
+**Try splitting one or more of the names across two lines.**
+```{r}
+barplot(table(data$public),
+        main="Frequency of Private vs. Public",
+        names.arg=c("Pri\nvate","Pub\nlic"),
+        cex.names=0.8,
+        ylab="Frequency")
+```
+
+
+**Again, look through the help documentation for the barplot() function.  Try changing something else about the table.**
+```{r}
+barplot(table(data$public),
+        width=c(0.1,0.1),
+        main="Frequency of Private vs. Public",
+        names.arg=c("Private","Public"),
+        cex.names=0.8,
+        ylab="Frequency")
+```
+
+
+##Box Plots
+
+Let's try making a box plot of the admission rate variable. 
+
+```{r}
+boxplot(data$adm_rate)
+```
+The whiskers extend to 1.5 times the inter-quartile range.  (We'll go over this more next time, but the inter-quartile range represents the middle half of the data.)  This is the default setting, but you could change it with the "range" argument. For example:
+
+
+```{r}
+boxplot(data2$adm_rate, range = 2)
+```
+
+Given the original (1.5x) view, there appear to be a number of outliers - enough of then that you probably would not want to drop those. However, we may remember from last week that there are some observations that have an admission rate of 0. We can list out a table of those schools with admission rates below .1 to get a sense of what these data points look like.
+
+```{r}
+table(data$adm_rate[which(data$adm_rate < .1)])
+```
+
+Given that all schools are above .05, except for the three at 0, we could decide to treat those three schools as outliers.  If so, one option is to drop these from the data.  (This is not always preferred, but we will discuss this more later in the quarter.)
+
+We can do that below:
+```{r}
+data2 <- data[which(data$adm_rate != 0 | is.na(data$adm_rate)), ]
+summary(data$adm_rate)
+summary(data2$adm_rate)
+```
+Let's break down the code here:
+
+  * "data2 <-" - we are creating a new data frame, called data2
+  * "data[x, ]" - we are assigning x rows of the current data frame (remember, you index items in the data frame with their [x,y] coordinates, and if you leave y blank, it takes all columns)
+  * "which()" - this function tells R to select those rows (in this case) which meet the conditions specified; we are going to use multiple conditions in this case
+  * "which(data$adm_rate != 0)" - select those rows which do *not* (that's the exclamation point) equal 0; this would only work for non-missing rows, so if you had this as the only condition, it would not send over the 5505 rows with missing admission rates
+  * "which(is.na(data$adm_rate))" - select those rows which have missing data for admission rate
+  * "|" - this is the logical "or" operator, so it tells R that it should select the row if condition A OR condition B is true
+  
+  **Make a box plot of SAT averages.  Are there clear outliers for this variable?  If so, try creating a third data set without those rows.**
+```{r}
+boxplot(data2$adm_rate,range=0)
+```
+  
+  

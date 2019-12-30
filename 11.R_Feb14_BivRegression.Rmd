@@ -1,0 +1,342 @@
+---
+title: "Bivariate Regression"
+author: "Lauren K. Perez"
+date: "2/12-14/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Open and Clean the Data
+
+*Open the College Scorecard data.  You will need to clean (i.e. replace "NULL" with NA, etc.) the following variables: `adm_rate`, `costt4_a`, `pctfloan`, and `sat_avg`.  (We have not used `costt4_a` before, but it is the total predicted cost over four years. For the others, you should be able to copy and paste the cleaning from previous files.  Try not to spend more than a few minutes on cleaning the data.)*
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+
+# clean up the data
+data2$opeid6[which(data2$opeid6=="NULL")]<-NA
+data2$instnm[which(data2$instnm=="NULL")]<-NA
+data2$city[which(data2$city=="NULL")]<-NA
+data2$stabbr[which(data2$stabbr=="NULL")]<-NA
+data2$accredagency[which(data2$accredagency=="NULL")]<-NA
+data2$hcm2[which(data2$hcm2=="NULL")]<-NA
+data2$main[which(data2$main=="NULL")]<-NA
+data2$numbranch[which(data2$numbranch=="NULL")]<-NA
+data2$preddeg[which(data2$preddeg=="NULL")]<-NA
+data2$highdeg[which(data2$highdeg=="NULL")]<-NA
+data2$control[which(data2$control=="NULL")]<-NA
+data2$menonly[which(data2$menonly=="NULL")]<-NA
+data2$womenonly[which(data2$womenonly=="NULL")]<-NA
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$relaffil[which(data2$relaffil=="NULL")]<-NA
+data2$actcm25[which(data2$actcm25=="NULL")]<-NA
+data2$actcm75[which(data2$actcm75=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_white[which(data2$ugds_white=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_black[which(data2$ugds_black=="NULL")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="NULL")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="NULL")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="NULL")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="NULL")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="NULL")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="NULL")]<-NA
+data2$inexpfte[which(data2$inexpfte=="NULL")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="NULL")]<-NA
+data2$pctpell[which(data2$pctpell=="NULL")]<-NA
+data2$c200_4[which(data2$c200_4=="NULL")]<-NA
+data2$c200_l4[which(data2$c200_l4=="NULL")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="NULL")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="NULL")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="NULL")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="NULL")]<-NA
+data2$pctfloan[which(data2$pctfloan=="NULL")]<-NA
+data2$ug25abv[which(data2$ug25abv=="NULL")]<-NA
+data2$cdr3[which(data2$cdr3=="NULL")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="NULL")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="NULL")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="NULL")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="NULL")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="NULL")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="NULL")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="NULL")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="NULL")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="NULL")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="NULL")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="NULL")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="NULL")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="NULL")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="NULL")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="NULL")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="NULL")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="NULL")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="NULL")]<-NA
+data2$faminc[which(data2$faminc=="NULL")]<-NA
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="NULL")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="NULL")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="NULL")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="NULL")]<-NA
+data2$c100_4[which(data2$c100_4=="NULL")]<-NA
+data2$c100_l4[which(data2$c100_l4=="NULL")]<-NA
+data2$ugds_men[which(data2$ugds_men=="NULL")]<-NA
+data2$ugds_women[which(data2$ugds_women=="NULL")]<-NA
+data2$opeid6[which(data2$opeid6=="PrivacySuppressed")]<-NA
+data2$instnm[which(data2$instnm=="PrivacySuppressed")]<-NA
+data2$city[which(data2$city=="PrivacySuppressed")]<-NA
+data2$stabbr[which(data2$stabbr=="PrivacySuppressed")]<-NA
+data2$accredagency[which(data2$accredagency=="PrivacySuppressed")]<-NA
+data2$hcm2[which(data2$hcm2=="PrivacySuppressedL")]<-NA
+data2$main[which(data2$main=="PrivacySuppressed")]<-NA
+data2$numbranch[which(data2$numbranch=="PrivacySuppressed")]<-NA
+data2$preddeg[which(data2$preddeg=="PrivacySuppressed")]<-NA
+data2$highdeg[which(data2$highdeg=="PrivacySuppressed")]<-NA
+data2$control[which(data2$control=="PrivacySuppressed")]<-NA
+data2$menonly[which(data2$menonly=="PrivacySuppressed")]<-NA
+data2$womenonly[which(data2$womenonly=="PrivacySuppressed")]<-NA
+data2$adm_rate[which(data2$adm_rate=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="PrivacySuppressed")]<-NA
+data2$actcm25[which(data2$actcm25=="PrivacySuppressed")]<-NA
+data2$actcm75[which(data2$actcm75=="PrivacySuppressed")]<-NA
+data2$sat_avg[which(data2$sat_avg=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_white[which(data2$ugds_white=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_black[which(data2$ugds_black=="PrivacySuppressed")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="PrivacySuppressed")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="PrivacySuppressed")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="PrivacySuppressed")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="PrivacySuppressed")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="PrivacySuppressed")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="PrivacySuppressed")]<-NA
+data2$inexpfte[which(data2$inexpfte=="PrivacySuppressed")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$c200_4[which(data2$c200_4=="PrivacySuppressed")]<-NA
+data2$c200_l4[which(data2$c200_l4=="PrivacySuppressed")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="PrivacySuppressed")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="PrivacySuppressed")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="PrivacySuppressed")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$ug25abv[which(data2$ug25abv=="PrivacySuppressed")]<-NA
+data2$cdr3[which(data2$cdr3=="PrivacySuppressed")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="PrivacySuppressed")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="PrivacySuppressed")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="PrivacySuppressed")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="PrivacySuppressed")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="PrivacySuppressed")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="PrivacySuppressed")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="PrivacySuppressed")]<-NA
+data2$faminc[which(data2$faminc=="PrivacySuppressed")]<-NA
+data2$md_faminc[which(data2$md_faminc=="PrivacySuppressed")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="PrivacySuppressed")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="PrivacySuppressed")]<-NA
+data2$c100_4[which(data2$c100_4=="PrivacySuppressed")]<-NA
+data2$c100_l4[which(data2$c100_l4=="PrivacySuppressed")]<-NA
+data2$ugds_men[which(data2$ugds_men=="PrivacySuppressed")]<-NA
+data2$ugds_women[which(data2$ugds_women=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="-2")]<-NA
+data2$preddeg[which(data2$preddeg=="0")]<-NA
+
+# convert data into numerics
+data2$opeid6<-as.numeric(data2$opeid6)
+data2$hcm2<-as.numeric(data2$hcm2)
+data2$main<-as.numeric(data2$main)
+data2$numbranch<-as.numeric(data2$numbranch)
+data2$preddeg<-as.numeric(data2$preddeg)
+data2$highdeg<-as.numeric(data2$highdeg)
+data2$control<-as.numeric(data2$control)
+data2$menonly<-as.numeric(data2$menonly)
+data2$womenonly<-as.numeric(data2$womenonly)
+data2$relaffil<-as.numeric(data2$relaffil)
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$actcm25<-as.numeric(data2$actcm25)
+data2$actcm75<-as.numeric(data2$actcm75)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+data2$ugds<-as.numeric(data2$ugds)
+data2$ugds_white<-as.numeric(data2$ugds_white)
+data2$ugds_black<-as.numeric(data2$ugds_black)
+data2$ugds_hisp<-as.numeric(data2$ugds_hisp)
+data2$ugds_asian<-as.numeric(data2$ugds_asian)
+data2$npt4_pub<-as.numeric(data2$npt4_pub)
+data2$npt4_priv<-as.numeric(data2$npt4_priv)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$tuitionfee_in<-as.numeric(data2$tuitionfee_in)
+data2$tuitionfee_out<-as.numeric(data2$tuitionfee_out)
+data2$tuitfte<-as.numeric(data2$tuitfte)
+data2$inexpfte<-as.numeric(data2$inexpfte)
+data2$avgfacsal<-as.numeric(data2$avgfacsal)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$c200_4<-as.numeric(data2$c200_4)
+data2$c200_l4<-as.numeric(data2$c200_l4)
+data2$ret_ft4<-as.numeric(data2$ret_ft4)
+data2$ret_ftl4<-as.numeric(data2$ret_ftl4)
+data2$ret_pt4<-as.numeric(data2$ret_pt4)
+data2$ret_ptl4<-as.numeric(data2$ret_ptl4)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$ug25abv<-as.numeric(data2$ug25abv)
+data2$cdr3<-as.numeric(data2$cdr3)
+data2$rpy_1yr_rt<-as.numeric(data2$rpy_1yr_rt)
+data2$female_rpy_1yr_rt<-as.numeric(data2$female_rpy_1yr_rt)
+data2$male_rpy_1yr_rt<-as.numeric(data2$male_rpy_1yr_rt)
+data2$rpy_3yr_rt<-as.numeric(data2$rpy_3yr_rt)
+data2$female_rpy_3yr_rt<-as.numeric(data2$female_rpy_3yr_rt)
+data2$male_rpy_3yr_rt<-as.numeric(data2$male_rpy_3yr_rt)
+data2$rpy_5yr_rt<-as.numeric(data2$rpy_5yr_rt)
+data2$female_rpy_5yr_rt<-as.numeric(data2$female_rpy_5yr_rt)
+data2$male_rpy_5yr_rt<-as.numeric(data2$male_rpy_5yr_rt)
+data2$inc_pct_lo<-as.numeric(data2$inc_pct_lo)
+data2$par_ed_pct_1stgen<-as.numeric(data2$par_ed_pct_1stgen)
+data2$inc_pct_m1<-as.numeric(data2$inc_pct_m1)
+data2$inc_pct_m2<-as.numeric(data2$inc_pct_m2)
+data2$inc_pct_h1<-as.numeric(data2$inc_pct_h1)
+data2$inc_pct_h2<-as.numeric(data2$inc_pct_h2)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$grad_debt_mdn<-as.numeric(data2$grad_debt_mdn)
+data2$wdraw_debt_mdn<-as.numeric(data2$wdraw_debt_mdn)
+data2$faminc<-as.numeric(data2$faminc)
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$faminc_ind<-as.numeric(data2$faminc_ind)
+data2$mn_earn_wne_p10<-as.numeric(data2$mn_earn_wne_p10)
+data2$md_earn_wne_p10<-as.numeric(data2$md_earn_wne_p10)
+data2$gt_25k_p10<-as.numeric(data2$gt_25k_p10)
+data2$c100_4<-as.numeric(data2$c100_4)
+data2$c100_l4<-as.numeric(data2$c100_l4)
+data2$ugds_men<-as.numeric(data2$ugds_men)
+data2$ugds_women<-as.numeric(data2$ugds_women)
+```
+
+#Bivariate Regression
+
+Let's start by running a bivariate regression with admission rate as the independent variable and cost as the dependent variable. OLS is a linear model, so thee function we use is the `lm()` function.  It takes the form lm(DV ~ IV). 
+
+```{r}
+mod1 <- lm(data2$costt4_a ~ data2$adm_rate)
+```
+
+If you just run that, it doesn't seem like much happened. That is because we told it to store the results of the regression as "mod1".  You can see that this worked by looking in your environment for an object called "mod1". Try running the function (without storing it as an object) in a new R chunk.  What happens? 
+```{r}
+lm(data2$costt4_a ~ data2$adm_rate)
+```
+
+We can also get the same result by using the `summary()` function.  Note, this will do something different when called on a linear regression model than it will when called on a single variable. 
+
+```{r}
+summary(mod1)
+```
+
+To get some additional output about the sum of squares (we'll talk more about this on day 2) we can use the `anova()` function. 
+
+```{r}
+anova(mod1)
+```
+
+*What would be the null and alternative hypotheses associated with this regression?*
+Null Hypotbesis: There is no relationship between admission rate and cost.
+Alternative Hypothesis: The cost of the school will be higher if the admission rate is lower.
+*Is the relationship between admission rate and cost significant?  At what level of significance?*
+The relationship between admission rate and cost is significant, because the p-value for the relationship is very low.
+*How would you interpret (write in sentence form in a meaningful way) the coefficient for the intercept?*
+
+*How would you interpret the results for the slope coefficient for addmission rate?*
+
+*What is the equation for the regression line? Write this in LaTeX math mode.*
+
+The next three questions you will not be able to answer until the second class on regression, so skip them for now if you are up to here on day 1. 
+
+*How would you interpret the residual standard error?*
+
+*How would you interpret the R-squared?*
+
+*How would you interpret the F-statistic?*
+
+*Now, run a regression using cost to predict the percentage of students with federal loans.  You might want to recode the federal loans variable so that it runs from 0-100 instead of 0-1 to ease interpretation.*
+
+*Write a paragraph interpreting the results of the regression.  Make sure to interpret the coefficients and discuss their significance, as well as what that significance means to us.  On day 2, also discuss the goodness-of-fit of the model.*
+
+# Using Plots to View Regression Results
+
+One helpful way to look at results of a regression can be to use a scatterplot and the regression line. To do this for the first model:
+
+```{r}
+plot(data2$adm_rate, data2$costt4_a,
+       xlab = "Admission Rate",
+       ylab = "Total 4-Year Cost ($)",
+       main = "Scatterplot of Admission Rate and Cost w/ Regression Line",
+       col='blue', pch = 16, cex = 0.5, 
+       abline(lm(data2$costt4_a ~ data2$adm_rate)))
+```
+
+We may also want to add the 95% confidence interval to the graph.  First, we have to predict the confidence intervals.  We add new columns to the dataset, called lower and upper, for the lower and upper bounds of the confidence intervals.
+
+```{r}
+## The "confidence" option produces three values: fitted points, lower bound, and upper bound.
+## We will keep only the bounds (items 2 and 3 of the confidence option, hence the 2 and 3 below):
+data2$lower <- predict(mod1,
+                         newdata = data2, na.action=na.pass,
+                         interval = "confidence")[,2]
+data2$upper <- predict(mod1,
+                         newdata = data2, na.action=na.pass,
+                         interval = "confidence")[,3]
+```
+
+Then we can add these to the plot. 
+
+```{r}
+plot(data2$adm_rate, data2$costt4_a,
+       xlab = "Admission Rate",
+       ylab = "Total 4-Year Cost ($)",
+       main = "Scatterplot of Admission Rate and Cost w/ Regression Line",
+       col='blue', pch = 16, cex = 0.5, 
+       abline(lm(data2$costt4_a ~ data2$adm_rate))) #Adds the regression line
+       lines(data2$adm_rate, data2$lower, lty = 'dashed', col = 'red')
+       lines(data2$adm_rate, data2$upper, lty = 'dashed', col = 'red')
+```
+
+*Now predict the upper and lower bounds for the second model and then plot that on top of a scatter plot, along with the regression line.*
+
+#Making nice tables
+
+We have learned how to use the `xtable` package to make "pretty" frequency tables.  We can try doing that for regression tables as well. 
+
+```{r, results = 'asis'}
+library(xtable)
+xtable(mod1)
+```
+
+That table is okay, and better than the output of the `summary()` function. However, it is missing some information that we normally put in these tables and that can be helfpul to your readers, such as the number of observations and the R-squared. 
+
+Therefore, when making regression tables, it is better to use the `stargazer` package.  Install this package now, if you don't have it already.  Remember not to put that command in the R Markdown file - do it in the console instead (or else your file won't knit).  Below is an example of how to use the `stargazer()` function.  Note that, just like with xtable, you need to add the ", results = 'asis'" bit to the top of the R chunk in order to get it to show up correctly when you knit the document. 
+
+```{r, results = 'asis'}
+library(stargazer)
+stargazer(mod1, type = "latex", header=FALSE,
+          title = "Bivariate Regression: Explaining 4-Year Total Cost")
+```
+
+*Now try making a table for model 2.*
+
+
+*If you have time, run a regression that uses the admission rate to predict the average SAT score.  Present and interpret the results.*
+
+*Remember to go back and answer the questions about the residual standard error, the R-squared, and the F-statistic if you skippedd those on day 1.*

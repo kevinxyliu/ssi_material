@@ -1,0 +1,119 @@
+---
+title: "Jan 17 SSI II"
+author: "Lauren K. Perez"
+date: "1/17/2019"
+output: pdf_document
+---
+Today's assignment is about Descriptive Statistics
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/kevinxyliu/Desktop") #Either add your working directory here or comment this out
+```
+
+
+*Add a heading that says that today's assignment is about Descriptive Statistics.*
+
+*Start by opening the College Scorecard data.  You should also do some data cleaning here.  Start by dealing with missing values for adm_rate and sat_avg, and make both of these numeric. (Remember, we've done this before.)*
+```{r}
+library(haven)
+data<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+```
+
+## Get a Summary of Variable 
+
+A useful function is summary() which will give you some of the basic statistics for that variable.  Summary() will give you the minimum and maximum (from which you can determine the range), the first and third quartiles, the median, the mean, and the amount of missing (NA) data. 
+
+*Try running the summary() function on admission rate, below.*
+
+```{r}
+summary(data2$adm_rate)
+```
+
+From this, we can see that the minimum is 0 and the maximum is 1, so there is a range of 1.  However, a lot of the data is in the top half of that range, since three quarters of it is above .563 (the first quartile), half of it is above .713 (the median), and a quarter of it is above .845 (the third quartile).  The mean is lower than the median, since it is "dragged" downward by the more extreme values at the lower end.  
+
+*Now get a summary of the SAT average variable and briefly discuss what the data look like.*
+```{r}
+summary(data2$sat_avg)
+```
+
+There are also other ways to get some of these statistics, as well as others.  Some of these use packages.  For example, we can try the Hmisc package.  
+
+*Go back up to the top, and in the first block of R code, add "library(pastecs)" to load the package.  You could add it here, but it is usually good coding practice to add these at the top so that you can keep track of all of the packages you use in a script. Note: you may not have this package installed yet.  I suggest never installing packages in a script, since you only ever need to do this once.  So you might go to the console below and try loading the package there.  If it works, you're all set.  If it doesn't, then run "install.packages("pastecs", dependencies=TRUE)" from the console.  After that, you should be fine just loading it in the script here. (The dependencies=TRUE option installs other packages that Hmisc depends on.  This will save you errors in a minute.)  Then run the code below.*
+
+```{r}
+stat.desc(data2$adm_rate)
+```
+
+You can see that this gives you some additional statistics, as well as some of the ones from above.  The two others that we talked about today are the variance and standard deviation.  
+
+*Do the same thing for SAT average.*
+
+There are a variety of other packages that will also give you variations of descriptive statistics.  We will stick with these for now. 
+
+## Individual Descriptive Statistics
+
+You can also get a lot of these statistics individually. 
+
+*Try running the functions below and check that they do what you think they should do.*
+
+```{r}
+mean(data$adm_rate, na.rm=TRUE)
+median(data$adm_rate, na.rm=TRUE)
+max(data$adm_rate, na.rm=TRUE)
+min(data$adm_rate, na.rm=TRUE)
+range(data$adm_rate, na.rm=TRUE)
+quantile(data$adm_rate, na.rm=TRUE)
+quantile(data2$adm_rate, c(.3,.6,.9), na.rm=TRUE) #allows you to get any quantile you want
+fivenum(data$adm_rate, na.rm=TRUE) #these are what you would need for a boxplot (minimum, lower hinge/first quartile, median, upper hinge/third quartile, maximum)
+
+var(data$adm_rate, na.rm=TRUE)
+sd(data$adm_rate, na.rm=TRUE)
+```
+
+You will note that all of these include the option ", na.rm=TRUE".  This says that it should remove the NA/missing observations before calculating the statistic.  If you do not include this, you will get NA as the response. 
+
+*Try running at least three of the above statistics for SAT average.  Also try running one without the ", na.rm=TRUE" option to see what happens.*
+
+## Frequency Tables
+
+For categorical data (and sometimes for quantiative data), we want a frequency table of how many observations there are for each value.  We have already used these a bit. 
+
+First, let's start with a pretty simple one.  The variable "main" is coded as 1 if a school is that school's main campus, and 0 if it is a branch campus.  Let's start by getting a frequency table of "main."
+
+```{r}
+table(data2$main)
+```
+
+From this, we can see that 2016 schools in the dataset are branch campuses, while 5687 are main campuses.  
+
+A slightly more complicated one is "preddeg".  This is the predominant degree that a school awards.  
+
+```{r}
+table(data2$preddeg)
+```
+
+443 observations are coded as 0, which is "not classified".  These should be changed to missing.  3343 schools are coded 1, meaning they predominantly award professional certificates; 1523 schools predominantly award associate's degrees (coded 2); 2102 schools predominantly award bachelor's degrees (coded 3), and 292 schools predominalty award graduate degrees (coded 4).  
+
+*Start by recoding the "not classified" observations so that they are coded as missing.  Then run a new frequency table to make sure it looks right.*
+
+Then we can take the mode of this variable. (We could have done it before, as well.  Would we have gotten the same outcome?)  There is no simple mode function, but you can combine the max and table functions to get the highest number of observations.  You can also have it then sort the values by frequency.
+
+```{r}
+max(table(data2$preddeg))
+names(sort(-table(data2$preddeg)))
+```
+
+So what that outcome is telling you is that there are the most observations coded 1 (certificate), the next most coded 3 (bachelor's), then 2 (associate's), then 4 (graduate). 
+
+Last time, we worked with the control variable (This variable indicates whether the college is public (coded 1), private non-profit (2), and private for-profit (3)).
+
+*Do any cleaning that you need to do of the control variable, make a frequency table, and find out the mode of this variable.*
+
+*Try to knit your document.*
+
+If you finish, follow the directions on the power point slide for what to do next. 
+
+
+
+

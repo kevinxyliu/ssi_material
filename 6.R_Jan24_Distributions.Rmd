@@ -1,0 +1,105 @@
+---
+title: "Distributions and Statistical Inference"
+author: "Lauren K. Perez"
+date: "1/24/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "your/file/path") #Either add your working directory here or comment this out
+```
+
+# Distributions
+
+We can use R to have it create and graph various distributions for us. The rnorm() function generates random numbers from a normal distribution.  It takes the form rnorm(N, mean, sd), where N is the number of observations (random numbers) you'd like it to generate.  We can then plot a histogram to see what the distribution looks like.
+
+```{r}
+normal <- rnorm(10000, 0, 1)
+hist(normal)
+```
+
+We can also take summary statistics of our new distribution. 
+
+```{r}
+summary(normal)
+```
+*Run the code above, then write down the mean below.  Then re-run both the first R chunk above (where we created x) and the one here, where we called for the summary statistics.*  
+
+There are two important things worth noting.  First, the mean is not exactly 0.  This is because the rnorm() function generates random numbers pulled from the distribution, so they will show some random deviation.  Thus, while the mean will be close to 0, it will not be exactly 0.  Second, the mean will change slightly every time you run the code (to create x).  This is because you are randomly creating x, so it will not be the same.  If you want to keep it the same, you can "set the seed" first. In the first block above, where we created x, copy and paste the following code (before we create x): `set.seed(100)`. Now, if you try running both code chunks a few times, you will get the same mean.  You can set the seed to any integer.  Doing so can be especially helpful if you want to be able to talk about the numbers in the text of an R markdown document and not have them change when you knit the document! 
+
+*Next, try creating another normal distribution with a mean of 8 and a standard deviation of 2.*
+```{r}
+normal2 <- rnorm(10000,8,2)
+summary(normal2)
+```
+
+We can do something similar for different distributions. 
+
+Some other distributions we will see later in the quarter/year are the chi-squared distribution, the F distribution, the poisson distribution, the uniform distribution, and the student t distribution.  The code below creates these distributions. 
+
+```{r}
+chisq <- rchisq(10000, df=7)
+f <- rf(10000, df1=15, df2=20)
+poisson <- rpois(10000, lambda = 3)
+uniform <- runif(10000)
+t <- rt(10000, df=15)
+hist(t)
+```
+
+*Try making histograms of these different distributions to see what they look like.*
+
+Do not worry too much right now about the meanings of the degrees of freedom (df), lambda, etc.  You may try changing them if you'd like, but otherwise I mostly want you to know that there are other distributions we can plot in R and how to do so. 
+
+*As an example, create a new distribution using the chi-squared distribution, but give it 15 degrees of freedom (df).  Plot a histogram. Then do the same for one with 30 degrees of freedom, but name this one `chisq30`.  What looks different?*
+```{r}
+chisq30 <- rchisq(10000, df=30)
+hist(chisq30)
+```
+
+As you might be sensing, as the chi-squared distribution has more degrees of freedom, it begins to approach the normal distribution.  
+
+To see this, we can add curves for both the actual chi-squared distribution and for a theoretical normal distribution to our histogram.  There are a few things we'll need to do to set this up.  You can look at the comments and code below to see how to do this. 
+
+```{r}
+#Our histogram
+hist(chisq30, freq = F)
+  #This is your standard histogram function
+  #Except, we set "freq = F" so that the Y axis is probability denisities rather than frequencies
+  #You need to do it this way to get the curves below added onto the graph
+
+#The actual distribution
+curve(dchisq(x, df=30), col = "red", add = TRUE)
+  #This tells it to plot a density curve, following the chi-squared distribution with 30 degrees of freedom
+  #"col = "red"" sets the color of the curve to red
+  #"add = TRUE" tells R to add this curve to our histogram plot
+
+#A similar, theoretical normal distribution
+curve(dnorm(x, mean = mean(chisq30), sd = sd(chisq30)), col = "blue", add = TRUE)
+  #Again, we're plotting a density curve
+  #This time, we're following the normal distribution (hence "dnorm" instead of "dchisq")
+  #We set the mean of the distribution to the mean of our chi-squared distribution, and the standard dev. to its sd
+  #"col = "blue" sets the color of the curve to blue
+  #"add = TRUE" tells R to add this curve to our histogram plot
+
+
+```
+
+*How similar are the two curves?*
+
+
+*Next, try doing the same thing (plotting a histogram, an actual curve, and a theoretical curve) for the normal distribution we created at the very top.  These curves should theoretically match up even more closely. Do they?*
+
+# LaTeX Math Mode
+
+One of the benefits of knitting an R Markddown document to a PDF is that you can use LaTeX's math mode to produce mathematical symbols and equations.  
+
+To put text in math mode, you put it between two dollar signs.  For example, some of the mathematical, algebraic, and statistical symbols we've used thus far are $N$, $X$, and $Y$.  You can also use it to create more complicated symbols, such as Greek letters.  For example, we know that we abbreviate the population mean with $\mu$ and the standard deviation with $\sigma$.  Adding the slash before those words in math mode tells LaTeX and R to print the symbols instead of just the letters.  You can preview what math mode looks like by hovering over the text in the R Markdown document.  We can also use math mode for things like the mean of a series of numbers ($\bar{X}$), for exponents/superscripts ($X^2$), for subscripts ($\mu_x$), the plus-minus symbol ($\pm$) and the summation symbol ($\sum$). We can also use it to write fractions neatly, such as $\frac{1}{x}$. 
+
+It is particularly useful for writing full equations.  For example, the equation for calculating the Z-score for a value, $X$, in a normal distribution is:
+
+$Z=\frac{X-\mu}{\sigma}$
+
+
+*Try writing out the equations for the mean and the standard deviation.*
+

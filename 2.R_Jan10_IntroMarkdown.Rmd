@@ -1,0 +1,80 @@
+---
+title: "Intro to R Markdown"
+author: "Lauren K. Perez"
+date: "1/10/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+Some of what follows in this document is the standard text that is included in any new R Markdown document you create from the template.  For example, if you go to File > New File > R Markdown and then select a PDF document, you will end up with a document that looks a lot like this (minus what I've added).  For the rest of this file, I will put new instructions that I've added (that I want you to follow) or questions I want you to answer in *italics*.  If you remember, this means that in the R Markdown (.Rmd) file, they will be surrounded on both sides by asterisks.  But when you "knit" the document, that text will show up in *italics*.
+
+*First, change the author text at the top to replace your name with mine.*
+
+Before moving on, let's look at that top R chunk.  That is a chunk of R code that provides some instructions for the rest of the document.  You can tell since it says "r setup", but it is really the commands themselves that make it apply to the rest of the document. The line below that sets it so that the code you write in later R chunks will print out in the final document (will echo in the final document).  The other thing you may often want to do in the setup chunk is to set your working directory.  If you do not do so in the R setup chunk, you will have to do it in each chunk that you need to access the working directory.  This top chunk is also a good place to load any packages you will need for the rest of the document (e.g. `library(haven)`).  You will also notice when you knit that this R chunk does not print in the final document (or echo).  This is because of the bit in the top line that says `include=FALSE`.  You can add the `include=FALSE` flag to any R chunk that you do not want to print, but in general in this course, I want you to include your code in the final document.
+
+*Set your working directory by adding the following line to the setup chunk:* `knitr::opts_knit$set(root.dir = "your/file/path/")`.
+
+*Now, find the `knit` button at the top of the document.* 
+
+If you just click `knit`, it should create a PDF (since that is what we have the output set to in the top of the document).  You can also click the down arrow to the right, and choose to knit to PDF or html or word.  
+
+*Try knitting to both a PDF and an html file.  Compare the top of the PDF to the markdown document.  Can you make sense of why it looks like it does?*
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+To add an additional chunk of R code, you can either type in the start and end code block lines manually, or you can go to the "insert" button at the top right and click on "R."
+
+*Try adding a chunk of your own R code. In it, open up the college scorecard data.  Remember that you will have to load any necessary packages (e.g. haven), which you should generally do in the setup chunk at the top.  Then use functions that we learned last time to find the names of the variables and the dimensions of the data frame.* 
+
+*Knit the document again and look at the output.  Find the results from your code chunk there.*
+
+Think back to what you learned in the fall.  The unit of analysis of a study is the individual units you are studying.  So in an experiment on individual human beings, the unit of analysis is the individual.  In a study of countries, the unit of analysis is the country.  However, if countries appear multiple times over multiple years, the unit of analysis would be the country-year, since each country appears in various years (and just saying the country as the unit of analysis would not be specific enough).  One good way to think about this is to think about what identifies each row of a data set.  
+
+*In the college scorecard data, what is the unit of analysis?  Add your answer as text below this line.* 
+
+*Think about the sat_avg and adm_rate variables.  What types of variables are they?*
+
+*Now let's look at the control variable. First check the class of the variable.*
+
+*If it is already numeric, continue.  If not, diagnose why not and fix the problem.  This could involve changing "NULL" to NA and converting it to numeric.*
+
+*In addition to looking at the variable in the data viewer, we could also print the first 50 values to get a sense of what the variable looks like.  Do so by creating an R chunk and using the following function:* `print(data$control[1:50])`
+
+*To be even more sure we are not missing any other values that show up after the first 50 rows, we can use the `table()` function.  This tells you the values of the variable and how many observations there are of each one.  Do this now, with the following code:* `table(data$control)`
+
+*Hopefully you can see that this variable seems to take the values of 1, 2, and 3. How many 1's are there?  How many 2's and 3's?*
+
+*If we had the codebook, we would see that 1 means the school is public, 2 means the school is private non-profit, and 3 means the school is a private for-profit school.  What type of variable do you think this is?*
+
+*Given your answer above, it might be more useful to have some dummy variables for each of the categories.  Why do you think this might be?*
+
+*Write code to make three new dummy variables - one for if the school is public or not, one for if it is a private non-profit or not, and one if it is a private for-profit or not.*
+
+*Use the `table()` function to check that these three dummy variables are coded correctly (compared to the results for the control variable).*
+
+*If you haven't yet made a general script for cleaning the college scorecard data, I would go start one now.  Include the commands from last time and the ones from this time, including the creation of the dummy variables.  We will use these in the future, so it will be nice to have all of those commands in one place.*
+
+As you can see, R Markdown is useful for both presenting text answers and for producing R code and output, which is why we will be using it for homework exercises and assignments in this course. 
+
+## Including Plots
+
+We will get to graphs in the next class, but it is good for you to know that you can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+If you have gotten to the end of this document, you may start the first exercise that is due Monday. 

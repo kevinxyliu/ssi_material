@@ -1,0 +1,461 @@
+---
+title: "Correlations"
+author: "Lauren K. Perez"
+date: "2/7/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Open and Clean the Data
+
+*Open the College Scorecard data.  You will need to clean (i.e. replace "NULL" with NA, etc.) the following variables: control, adm_rate, debt_mdn, preddeg, and pctfloan).  (We have not used pctfloan before, but it is the percentage of students at that school who receive federal loans. For the others, you should be able to copy and paste the cleaning from previous files.  Try not to spend more than a few minutes on cleaning the data.)*
+
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+
+# clean up the data
+data2$opeid6[which(data2$opeid6=="NULL")]<-NA
+data2$instnm[which(data2$instnm=="NULL")]<-NA
+data2$city[which(data2$city=="NULL")]<-NA
+data2$stabbr[which(data2$stabbr=="NULL")]<-NA
+data2$accredagency[which(data2$accredagency=="NULL")]<-NA
+data2$hcm2[which(data2$hcm2=="NULL")]<-NA
+data2$main[which(data2$main=="NULL")]<-NA
+data2$numbranch[which(data2$numbranch=="NULL")]<-NA
+data2$preddeg[which(data2$preddeg=="NULL")]<-NA
+data2$highdeg[which(data2$highdeg=="NULL")]<-NA
+data2$control[which(data2$control=="NULL")]<-NA
+data2$menonly[which(data2$menonly=="NULL")]<-NA
+data2$womenonly[which(data2$womenonly=="NULL")]<-NA
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$relaffil[which(data2$relaffil=="NULL")]<-NA
+data2$actcm25[which(data2$actcm25=="NULL")]<-NA
+data2$actcm75[which(data2$actcm75=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_white[which(data2$ugds_white=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_black[which(data2$ugds_black=="NULL")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="NULL")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="NULL")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="NULL")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="NULL")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="NULL")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="NULL")]<-NA
+data2$inexpfte[which(data2$inexpfte=="NULL")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="NULL")]<-NA
+data2$pctpell[which(data2$pctpell=="NULL")]<-NA
+data2$c200_4[which(data2$c200_4=="NULL")]<-NA
+data2$c200_l4[which(data2$c200_l4=="NULL")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="NULL")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="NULL")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="NULL")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="NULL")]<-NA
+data2$pctfloan[which(data2$pctfloan=="NULL")]<-NA
+data2$ug25abv[which(data2$ug25abv=="NULL")]<-NA
+data2$cdr3[which(data2$cdr3=="NULL")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="NULL")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="NULL")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="NULL")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="NULL")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="NULL")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="NULL")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="NULL")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="NULL")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="NULL")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="NULL")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="NULL")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="NULL")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="NULL")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="NULL")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="NULL")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="NULL")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="NULL")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="NULL")]<-NA
+data2$faminc[which(data2$faminc=="NULL")]<-NA
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="NULL")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="NULL")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="NULL")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="NULL")]<-NA
+data2$c100_4[which(data2$c100_4=="NULL")]<-NA
+data2$c100_l4[which(data2$c100_l4=="NULL")]<-NA
+data2$ugds_men[which(data2$ugds_men=="NULL")]<-NA
+data2$ugds_women[which(data2$ugds_women=="NULL")]<-NA
+data2$opeid6[which(data2$opeid6=="PrivacySuppressed")]<-NA
+data2$instnm[which(data2$instnm=="PrivacySuppressed")]<-NA
+data2$city[which(data2$city=="PrivacySuppressed")]<-NA
+data2$stabbr[which(data2$stabbr=="PrivacySuppressed")]<-NA
+data2$accredagency[which(data2$accredagency=="PrivacySuppressed")]<-NA
+data2$hcm2[which(data2$hcm2=="PrivacySuppressedL")]<-NA
+data2$main[which(data2$main=="PrivacySuppressed")]<-NA
+data2$numbranch[which(data2$numbranch=="PrivacySuppressed")]<-NA
+data2$preddeg[which(data2$preddeg=="PrivacySuppressed")]<-NA
+data2$highdeg[which(data2$highdeg=="PrivacySuppressed")]<-NA
+data2$control[which(data2$control=="PrivacySuppressed")]<-NA
+data2$menonly[which(data2$menonly=="PrivacySuppressed")]<-NA
+data2$womenonly[which(data2$womenonly=="PrivacySuppressed")]<-NA
+data2$adm_rate[which(data2$adm_rate=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="PrivacySuppressed")]<-NA
+data2$actcm25[which(data2$actcm25=="PrivacySuppressed")]<-NA
+data2$actcm75[which(data2$actcm75=="PrivacySuppressed")]<-NA
+data2$sat_avg[which(data2$sat_avg=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_white[which(data2$ugds_white=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_black[which(data2$ugds_black=="PrivacySuppressed")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="PrivacySuppressed")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="PrivacySuppressed")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="PrivacySuppressed")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="PrivacySuppressed")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="PrivacySuppressed")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="PrivacySuppressed")]<-NA
+data2$inexpfte[which(data2$inexpfte=="PrivacySuppressed")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$c200_4[which(data2$c200_4=="PrivacySuppressed")]<-NA
+data2$c200_l4[which(data2$c200_l4=="PrivacySuppressed")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="PrivacySuppressed")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="PrivacySuppressed")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="PrivacySuppressed")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$ug25abv[which(data2$ug25abv=="PrivacySuppressed")]<-NA
+data2$cdr3[which(data2$cdr3=="PrivacySuppressed")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="PrivacySuppressed")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="PrivacySuppressed")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="PrivacySuppressed")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="PrivacySuppressed")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="PrivacySuppressed")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="PrivacySuppressed")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="PrivacySuppressed")]<-NA
+data2$faminc[which(data2$faminc=="PrivacySuppressed")]<-NA
+data2$md_faminc[which(data2$md_faminc=="PrivacySuppressed")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="PrivacySuppressed")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="PrivacySuppressed")]<-NA
+data2$c100_4[which(data2$c100_4=="PrivacySuppressed")]<-NA
+data2$c100_l4[which(data2$c100_l4=="PrivacySuppressed")]<-NA
+data2$ugds_men[which(data2$ugds_men=="PrivacySuppressed")]<-NA
+data2$ugds_women[which(data2$ugds_women=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="-2")]<-NA
+data2$preddeg[which(data2$preddeg=="0")]<-NA
+
+# convert data into numerics
+data2$opeid6<-as.numeric(data2$opeid6)
+data2$hcm2<-as.numeric(data2$hcm2)
+data2$main<-as.numeric(data2$main)
+data2$numbranch<-as.numeric(data2$numbranch)
+data2$preddeg<-as.numeric(data2$preddeg)
+data2$highdeg<-as.numeric(data2$highdeg)
+data2$control<-as.numeric(data2$control)
+data2$menonly<-as.numeric(data2$menonly)
+data2$womenonly<-as.numeric(data2$womenonly)
+data2$relaffil<-as.numeric(data2$relaffil)
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$actcm25<-as.numeric(data2$actcm25)
+data2$actcm75<-as.numeric(data2$actcm75)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+data2$ugds<-as.numeric(data2$ugds)
+data2$ugds_white<-as.numeric(data2$ugds_white)
+data2$ugds_black<-as.numeric(data2$ugds_black)
+data2$ugds_hisp<-as.numeric(data2$ugds_hisp)
+data2$ugds_asian<-as.numeric(data2$ugds_asian)
+data2$npt4_pub<-as.numeric(data2$npt4_pub)
+data2$npt4_priv<-as.numeric(data2$npt4_priv)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$tuitionfee_in<-as.numeric(data2$tuitionfee_in)
+data2$tuitionfee_out<-as.numeric(data2$tuitionfee_out)
+data2$tuitfte<-as.numeric(data2$tuitfte)
+data2$inexpfte<-as.numeric(data2$inexpfte)
+data2$avgfacsal<-as.numeric(data2$avgfacsal)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$c200_4<-as.numeric(data2$c200_4)
+data2$c200_l4<-as.numeric(data2$c200_l4)
+data2$ret_ft4<-as.numeric(data2$ret_ft4)
+data2$ret_ftl4<-as.numeric(data2$ret_ftl4)
+data2$ret_pt4<-as.numeric(data2$ret_pt4)
+data2$ret_ptl4<-as.numeric(data2$ret_ptl4)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$ug25abv<-as.numeric(data2$ug25abv)
+data2$cdr3<-as.numeric(data2$cdr3)
+data2$rpy_1yr_rt<-as.numeric(data2$rpy_1yr_rt)
+data2$female_rpy_1yr_rt<-as.numeric(data2$female_rpy_1yr_rt)
+data2$male_rpy_1yr_rt<-as.numeric(data2$male_rpy_1yr_rt)
+data2$rpy_3yr_rt<-as.numeric(data2$rpy_3yr_rt)
+data2$female_rpy_3yr_rt<-as.numeric(data2$female_rpy_3yr_rt)
+data2$male_rpy_3yr_rt<-as.numeric(data2$male_rpy_3yr_rt)
+data2$rpy_5yr_rt<-as.numeric(data2$rpy_5yr_rt)
+data2$female_rpy_5yr_rt<-as.numeric(data2$female_rpy_5yr_rt)
+data2$male_rpy_5yr_rt<-as.numeric(data2$male_rpy_5yr_rt)
+data2$inc_pct_lo<-as.numeric(data2$inc_pct_lo)
+data2$par_ed_pct_1stgen<-as.numeric(data2$par_ed_pct_1stgen)
+data2$inc_pct_m1<-as.numeric(data2$inc_pct_m1)
+data2$inc_pct_m2<-as.numeric(data2$inc_pct_m2)
+data2$inc_pct_h1<-as.numeric(data2$inc_pct_h1)
+data2$inc_pct_h2<-as.numeric(data2$inc_pct_h2)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$grad_debt_mdn<-as.numeric(data2$grad_debt_mdn)
+data2$wdraw_debt_mdn<-as.numeric(data2$wdraw_debt_mdn)
+data2$faminc<-as.numeric(data2$faminc)
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$faminc_ind<-as.numeric(data2$faminc_ind)
+data2$mn_earn_wne_p10<-as.numeric(data2$mn_earn_wne_p10)
+data2$md_earn_wne_p10<-as.numeric(data2$md_earn_wne_p10)
+data2$gt_25k_p10<-as.numeric(data2$gt_25k_p10)
+data2$c100_4<-as.numeric(data2$c100_4)
+data2$c100_l4<-as.numeric(data2$c100_l4)
+data2$ugds_men<-as.numeric(data2$ugds_men)
+data2$ugds_women<-as.numeric(data2$ugds_women)
+
+```
+
+*Make a new dummy variable for whether a college is selective or not.  This should take a value of 1 if the school's admission rate is less than 0.35.  (We have done this before.)*
+
+```{r}
+data2$selective <-0
+data2$selective[which(data2$adm_rate < 0.35)]<-1
+data2$selective[which(is.na(data2$adm_rate))]<-NA
+```
+
+*Also make the public (vs. private) dummy.  (We have done this before.)* 
+
+```{r}
+data2$public <- ifelse(data2$control == "1",1,0)
+```
+
+
+#Scatterplots
+
+Let's start looking at two continuous variables.  One of the first ways to get a sense of the relationship is to make a scatter plot.  
+
+Let's start with the relationship between admission rates and the percentage of students with federal loans. You use the plot() function.  You tell it what variable you want on the X-axis (first) and on the Y-axis (second).  These should be the independent variable on the X-axis and the dependent variable on the Y-axis.
+
+```{r}
+plot(data2$adm_rate, data2$pctfloan,
+     xlab = "Admissions Rate",
+     ylab = "% students with federal loan",
+     main = "Scatterplot of Admission Rates and Federal Loan Rates")
+```
+In this case, it is a bit hard to see with the bigger dots.  We can adjust these:
+
+```{r}
+plot(data2$adm_rate, data2$pctfloan,
+     xlab = "admissions rate",
+     ylab = "% students with federal loan",
+     main = "Scatterplot of Admission Rates and Federal Loan Rates",
+     pch = 16, cex = 0.5)
+```
+The "pch" option fills in the dots and the "cex" option changes the magnification/size of the dots. 
+
+*What type of correlation does this look like?*
+
+This looks like a positive relationship.
+
+*Make a scatterplot of percent with federal loans and median debt.  What type of correlation does this look like?*
+
+```{r}
+plot(data2$pctfloan, data2$debt_mdn,
+     xlab = "% students with federal loan",
+     ylab = "median debt",
+     main = "Scatterplot of % of federal loans and Median Debt",
+     pch = 16, cex = 0.5)
+```
+
+# Covariance
+
+To get the covariance, we use the covar() function.  
+
+```{r}
+cov(data2$adm_rate,data2$pctfloan,
+    use = "pairwise.complete.obs")
+```
+
+The option "use = "pairwise.complete.obs"" tells it to only use observations for which neither adm_rate nor pctfloan  are missing.  R has other ways it can do this, but for this class, you should always use this option. 
+
+*Get the covariance of percent with federal loans and median debt.*
+```{r}
+cov(data2$pctfloan,data2$debt_mdn,
+    use="pairwise.complete.obs")
+```
+
+
+# Correlation
+
+To get the correlation in R, we use the cor() function.  Again, we give it the two variables we are interested in (adm_rate and pctfloan) and use the same pairwise complete option. 
+
+```{r}
+cor(data2$adm_rate,data2$pctfloan,
+    use = "pairwise.complete.obs")
+```
+
+*Is this a positive or negative correlation?  Is it a strong or weak correlation?  Why?*
+
+This is a positive weak correlation.
+
+*What is the correlation between percent with federal loans and median debt?*
+
+```{r}
+cor(data2$pctfloan,data2$debt_mdn,
+    use = "pairwise.complete.obs")
+```
+
+To test the significance of a correlation, we use the cor.test() function.  You give it the two objects/variables you want to test the correlation between, and use the option "method= "pearson"" to tell it that we want Pearson's R. 
+
+```{r}
+cor.test(data2$adm_rate,data2$pctfloan, 
+          method = "pearson")
+```
+Looking at this output, we see the data we used to calculate it in the first line.  The second line gives us the t-statistic, the degrees of freedom, and the p-value.  The p-value is less than 0.000, so this is highly significant.  Thus, we can reject the null and find evidence for our alternative hypothesis, which is that the true population correlation is not equal to 0.  It then gives us the 95% confidence interval for the correlation.  As you can see, this does not include 0, which is another way that you can be sure the correlation is significant at the 95% level.  Finally, at the bottom, it gives us the sample correlation coefficient that we got above. 
+
+*Use the cor.test() function to determine if the correlation between the percentage of federal loans and median debt is significant.*
+
+```{r}
+cor.test(data2$pctfloan,data2$debt_mdn, 
+          method = "pearson")
+```
+
+# Scatterplots with Jitter
+
+In the cases above, we had a lot of data that was well spread out.  But sometimes, a lot of the data will be clumped together and it can be hard to see where all of the data are, since they are on top of one another.  One way to overcome this problem is to add "jitter" or random variation to the dots to make it easier to see.  
+
+In order to get clumped up data, let's make a plot of `control` and `preddeg`.  Since these are not continuous variables, it is a bit unusual to make a scatterplot of them, but it will serve the purpose of needing and using jitter. 
+
+*First, make a table without jitter so that you have something to compare it to.*
+```{r}
+plot(data2$control,data2$preddeg)
+```
+
+*Now, remake the table with jitter.  I have included the code for addding jitter - you should add the code to label the axes and give it a title, etc. In this case, leaving the dots as hollow circles may be helpful.*
+
+```{r}
+plot(jitter(data2$control, 2), jitter(data2$preddeg, 2))
+```
+If you plot your data and it does not look like what you expect it to look like, you should try adding jitter.  
+
+*Try changing the jitter number to see what changes.*
+
+# Making "Pretty" Tables
+
+Last time, we worked on making tables by hand in R.  Today, let's have R help us make them. 
+
+Note:  We will be calling tables "pretty" tables as a way to denote that you should make a presentable, professional, and yes, pretty, table.  This is not actually a formal term, it's just a way to denote that you should make a nice-looking table, rather than just present R output. 
+
+Another way to make presentable tables in R is with the xtable package.  
+
+*Install this in the console if you do not have it already.  (You can check if you have it by running the library(xtable) function, as it will give you an error if you don't have it downloaded.)  Once you have it, load the package.*
+
+```{r}
+library(xtable)
+```
+
+*Next, make a basic two-way frequency table of selective and control, as we did last time.  Store it as a new object called "tab".*
+
+```{r}
+tab<-table(data2$selective, data2$control)
+```
+
+We can print the table using the xtable() function. 
+
+```{r, results='asis'}
+xtable(tab)
+```
+
+If you just run the command within the R Markdown file, it doesn't look like much. This is LaTeX language for a table.  Aren't you glad you didn't have to type that out by hand?  Try knitting it and note how much prettier and more professional looking that table is.  (Also take note of that not as pretty legend at the bottom.  We'll learn how to remove that.)
+
+Another thing to note is that I added ", results='asis'" to the top of that previous R chunk.  If you do not do that, you will get the LaTeX code, rather than the actual table.  *Remember this in the future!*
+
+To get rid of the legend, we can add an option that turns off the comment/legend.  I've written that in the chunk below. 
+
+*Add the same xtable() function on the "tab" table, below the "options" line.  Knit the document, first without adding the ", results='asis'" option to the top of the chunk.  Note what it looks like.  Then add that, and knit again.  Now you should have the pretty table, without the comment.*
+
+```{r, results='asis'}
+options(xtable.comment = FALSE)
+xtable(tab)
+```
+
+FYI: I have been calling this type of table a "two-way frequency table", but it is also called a "joint frequency table", since the frequency in each cell is the "joint frequency" (the number of times a combination of two variables occurs).
+
+We can also make a table using the relative frequencies, or the proportion of observations that are in each cell of the table. 
+
+```{r, results='asis'}
+xtable(prop.table(tab), digits = 4)
+```
+
+We can also make conditional frequency tables, which gives the frequency with which a particular variable occurs conditional upon the value of another variable.  This is the type of table that we used for the electoral system/number of parties table last time, where it gave the frequency of the number of parties, conditional on the electoral system.  In that example, we were using within-column percentages and it was conditional on the column. 
+
+To do this for our example, we will use within-column percentages for the selectivity of each school, conditional on type of control.  
+
+```{r, results = 'asis'}
+xtable(prop.table(tab,2))
+```
+
+We could also do it for within-row percentages for how frequently a school will be each type of control, conditional on selectivity.   
+
+*Create a conditional frequency table, across rows, for school selectivity and control.  To do this, you use the same code as above, but you change the "2" option in the command to the "1" option.*
+
+```{r, results = 'asis'}
+xtable(prop.table(tab,1))
+```
+
+The reason these are 1 and 2 is because R stores the row variable (selectivity) as the first object, whereas it stores the column variable (control) as the second object. 
+
+Another feature we might want on our table is the row and column totals, also called the "marginal frequency".
+
+We can add these to our original "tab" object, using the following command:
+
+```{r}
+tab <- addmargins(tab)
+```
+
+If you run that chunk, you'll see it doesn't appear to do anything (there is no output).  However, if you look at the tab object in the environment, you may notice that it went from being a 2x3 table ("[1:2, 1:3]") to being a 3x4 table, because we have added both a row and a column. You could also print the "tab" object to see this.  
+
+*Use the xtable() function to create the table of the new "tab" object. It should now include the marginal frequencies.*
+
+```{r, results = 'asis'}
+xtable(tab)
+```
+
+If we want the table to look really pretty, we should add names/lables to our table.  We can do this by creating a vector of column names (colnames) and row names (rownames).  
+
+```{r, results = 'asis'}
+rownames(tab)  <- c("Not selective", "Selective",
+                    "Total")
+colnames(tab) <- c("Public", "Priv-NP", "Priv-FP",
+                   "Total")
+xtable(tab)
+```
+
+
+If you knit that table, you'll see that it comes out as we'd like, except for the fact that there are two decimal places after each number.  Since these are all whole numbers, this is pretty useless.  We can control this with the "digits" option for the xtable() function.  
+
+*Replicate the table above, but add the argument "digits=0".  Remember, arguments for a function go after the argument you are calling (tab), and are separated from that object with a comma.*
+
+```{r, results = 'asis'}
+rownames(tab)  <- c("Not selective", "Selective",
+                    "Total")
+colnames(tab) <- c("Public", "Priv-NP", "Priv-FP",
+                   "Total")
+xtable(tab,digits=0)
+```
+
+*Now make a "pretty" table that is a two-way frequency table for control and predominant degree (`preddeg`). Include the "marginal frequency", or row and column totals.   Remember to go back through all the steps above, including first creating the table and storing it as an object.  You should also make a relative frequency table (using proportions instead of number of observations), and two conditional frequency tables (one by row, one by column).*

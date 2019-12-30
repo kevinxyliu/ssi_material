@@ -1,0 +1,305 @@
+---
+title: "OLS Extensions - Categorical Variables and Interaction Effects"
+author: "Lauren K. Perez"
+date: "2/28/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Start by opening the College Scorecard data and doing general cleaning, which you should be able to take most of from previous files.  We will be using the following variables: control, median debt, median family income, total cost, percent pell, percent federal loan, admission rate, SAT average, average faculty salary (avgfacsal), and the number of undergrads (ugds).*
+
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+
+# clean up the data
+data2$opeid6[which(data2$opeid6=="NULL")]<-NA
+data2$instnm[which(data2$instnm=="NULL")]<-NA
+data2$city[which(data2$city=="NULL")]<-NA
+data2$stabbr[which(data2$stabbr=="NULL")]<-NA
+data2$accredagency[which(data2$accredagency=="NULL")]<-NA
+data2$hcm2[which(data2$hcm2=="NULL")]<-NA
+data2$main[which(data2$main=="NULL")]<-NA
+data2$numbranch[which(data2$numbranch=="NULL")]<-NA
+data2$preddeg[which(data2$preddeg=="NULL")]<-NA
+data2$highdeg[which(data2$highdeg=="NULL")]<-NA
+data2$control[which(data2$control=="NULL")]<-NA
+data2$menonly[which(data2$menonly=="NULL")]<-NA
+data2$womenonly[which(data2$womenonly=="NULL")]<-NA
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$relaffil[which(data2$relaffil=="NULL")]<-NA
+data2$actcm25[which(data2$actcm25=="NULL")]<-NA
+data2$actcm75[which(data2$actcm75=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_white[which(data2$ugds_white=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_black[which(data2$ugds_black=="NULL")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="NULL")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="NULL")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="NULL")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="NULL")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="NULL")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="NULL")]<-NA
+data2$inexpfte[which(data2$inexpfte=="NULL")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="NULL")]<-NA
+data2$pctpell[which(data2$pctpell=="NULL")]<-NA
+data2$c200_4[which(data2$c200_4=="NULL")]<-NA
+data2$c200_l4[which(data2$c200_l4=="NULL")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="NULL")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="NULL")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="NULL")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="NULL")]<-NA
+data2$pctfloan[which(data2$pctfloan=="NULL")]<-NA
+data2$ug25abv[which(data2$ug25abv=="NULL")]<-NA
+data2$cdr3[which(data2$cdr3=="NULL")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="NULL")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="NULL")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="NULL")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="NULL")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="NULL")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="NULL")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="NULL")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="NULL")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="NULL")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="NULL")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="NULL")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="NULL")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="NULL")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="NULL")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="NULL")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="NULL")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="NULL")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="NULL")]<-NA
+data2$faminc[which(data2$faminc=="NULL")]<-NA
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="NULL")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="NULL")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="NULL")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="NULL")]<-NA
+data2$c100_4[which(data2$c100_4=="NULL")]<-NA
+data2$c100_l4[which(data2$c100_l4=="NULL")]<-NA
+data2$ugds_men[which(data2$ugds_men=="NULL")]<-NA
+data2$ugds_women[which(data2$ugds_women=="NULL")]<-NA
+data2$opeid6[which(data2$opeid6=="PrivacySuppressed")]<-NA
+data2$instnm[which(data2$instnm=="PrivacySuppressed")]<-NA
+data2$city[which(data2$city=="PrivacySuppressed")]<-NA
+data2$stabbr[which(data2$stabbr=="PrivacySuppressed")]<-NA
+data2$accredagency[which(data2$accredagency=="PrivacySuppressed")]<-NA
+data2$hcm2[which(data2$hcm2=="PrivacySuppressedL")]<-NA
+data2$main[which(data2$main=="PrivacySuppressed")]<-NA
+data2$numbranch[which(data2$numbranch=="PrivacySuppressed")]<-NA
+data2$preddeg[which(data2$preddeg=="PrivacySuppressed")]<-NA
+data2$highdeg[which(data2$highdeg=="PrivacySuppressed")]<-NA
+data2$control[which(data2$control=="PrivacySuppressed")]<-NA
+data2$menonly[which(data2$menonly=="PrivacySuppressed")]<-NA
+data2$womenonly[which(data2$womenonly=="PrivacySuppressed")]<-NA
+data2$adm_rate[which(data2$adm_rate=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="PrivacySuppressed")]<-NA
+data2$actcm25[which(data2$actcm25=="PrivacySuppressed")]<-NA
+data2$actcm75[which(data2$actcm75=="PrivacySuppressed")]<-NA
+data2$sat_avg[which(data2$sat_avg=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_white[which(data2$ugds_white=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_black[which(data2$ugds_black=="PrivacySuppressed")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="PrivacySuppressed")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="PrivacySuppressed")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="PrivacySuppressed")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="PrivacySuppressed")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="PrivacySuppressed")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="PrivacySuppressed")]<-NA
+data2$inexpfte[which(data2$inexpfte=="PrivacySuppressed")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$c200_4[which(data2$c200_4=="PrivacySuppressed")]<-NA
+data2$c200_l4[which(data2$c200_l4=="PrivacySuppressed")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="PrivacySuppressed")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="PrivacySuppressed")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="PrivacySuppressed")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$ug25abv[which(data2$ug25abv=="PrivacySuppressed")]<-NA
+data2$cdr3[which(data2$cdr3=="PrivacySuppressed")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="PrivacySuppressed")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="PrivacySuppressed")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="PrivacySuppressed")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="PrivacySuppressed")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="PrivacySuppressed")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="PrivacySuppressed")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="PrivacySuppressed")]<-NA
+data2$faminc[which(data2$faminc=="PrivacySuppressed")]<-NA
+data2$md_faminc[which(data2$md_faminc=="PrivacySuppressed")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="PrivacySuppressed")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="PrivacySuppressed")]<-NA
+data2$c100_4[which(data2$c100_4=="PrivacySuppressed")]<-NA
+data2$c100_l4[which(data2$c100_l4=="PrivacySuppressed")]<-NA
+data2$ugds_men[which(data2$ugds_men=="PrivacySuppressed")]<-NA
+data2$ugds_women[which(data2$ugds_women=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="-2")]<-NA
+data2$preddeg[which(data2$preddeg=="0")]<-NA
+
+# convert data into numerics
+data2$opeid6<-as.numeric(data2$opeid6)
+data2$hcm2<-as.numeric(data2$hcm2)
+data2$main<-as.numeric(data2$main)
+data2$numbranch<-as.numeric(data2$numbranch)
+data2$preddeg<-as.numeric(data2$preddeg)
+data2$highdeg<-as.numeric(data2$highdeg)
+data2$control<-as.numeric(data2$control)
+data2$menonly<-as.numeric(data2$menonly)
+data2$womenonly<-as.numeric(data2$womenonly)
+data2$relaffil<-as.numeric(data2$relaffil)
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$actcm25<-as.numeric(data2$actcm25)
+data2$actcm75<-as.numeric(data2$actcm75)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+data2$ugds<-as.numeric(data2$ugds)
+data2$ugds_white<-as.numeric(data2$ugds_white)
+data2$ugds_black<-as.numeric(data2$ugds_black)
+data2$ugds_hisp<-as.numeric(data2$ugds_hisp)
+data2$ugds_asian<-as.numeric(data2$ugds_asian)
+data2$npt4_pub<-as.numeric(data2$npt4_pub)
+data2$npt4_priv<-as.numeric(data2$npt4_priv)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$tuitionfee_in<-as.numeric(data2$tuitionfee_in)
+data2$tuitionfee_out<-as.numeric(data2$tuitionfee_out)
+data2$tuitfte<-as.numeric(data2$tuitfte)
+data2$inexpfte<-as.numeric(data2$inexpfte)
+data2$avgfacsal<-as.numeric(data2$avgfacsal)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$c200_4<-as.numeric(data2$c200_4)
+data2$c200_l4<-as.numeric(data2$c200_l4)
+data2$ret_ft4<-as.numeric(data2$ret_ft4)
+data2$ret_ftl4<-as.numeric(data2$ret_ftl4)
+data2$ret_pt4<-as.numeric(data2$ret_pt4)
+data2$ret_ptl4<-as.numeric(data2$ret_ptl4)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$ug25abv<-as.numeric(data2$ug25abv)
+data2$cdr3<-as.numeric(data2$cdr3)
+data2$rpy_1yr_rt<-as.numeric(data2$rpy_1yr_rt)
+data2$female_rpy_1yr_rt<-as.numeric(data2$female_rpy_1yr_rt)
+data2$male_rpy_1yr_rt<-as.numeric(data2$male_rpy_1yr_rt)
+data2$rpy_3yr_rt<-as.numeric(data2$rpy_3yr_rt)
+data2$female_rpy_3yr_rt<-as.numeric(data2$female_rpy_3yr_rt)
+data2$male_rpy_3yr_rt<-as.numeric(data2$male_rpy_3yr_rt)
+data2$rpy_5yr_rt<-as.numeric(data2$rpy_5yr_rt)
+data2$female_rpy_5yr_rt<-as.numeric(data2$female_rpy_5yr_rt)
+data2$male_rpy_5yr_rt<-as.numeric(data2$male_rpy_5yr_rt)
+data2$inc_pct_lo<-as.numeric(data2$inc_pct_lo)
+data2$par_ed_pct_1stgen<-as.numeric(data2$par_ed_pct_1stgen)
+data2$inc_pct_m1<-as.numeric(data2$inc_pct_m1)
+data2$inc_pct_m2<-as.numeric(data2$inc_pct_m2)
+data2$inc_pct_h1<-as.numeric(data2$inc_pct_h1)
+data2$inc_pct_h2<-as.numeric(data2$inc_pct_h2)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$grad_debt_mdn<-as.numeric(data2$grad_debt_mdn)
+data2$wdraw_debt_mdn<-as.numeric(data2$wdraw_debt_mdn)
+data2$faminc<-as.numeric(data2$faminc)
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$faminc_ind<-as.numeric(data2$faminc_ind)
+data2$mn_earn_wne_p10<-as.numeric(data2$mn_earn_wne_p10)
+data2$md_earn_wne_p10<-as.numeric(data2$md_earn_wne_p10)
+data2$gt_25k_p10<-as.numeric(data2$gt_25k_p10)
+data2$c100_4<-as.numeric(data2$c100_4)
+data2$c100_l4<-as.numeric(data2$c100_l4)
+data2$ugds_men<-as.numeric(data2$ugds_men)
+data2$ugds_women<-as.numeric(data2$ugds_women)
+```
+
+# Categorical Variables
+
+*If we want to include the control variable (for the type of school) in the model, we need to create a series of dummy variables, since we cannot include a categorical variable in a regression model.  Start by creating three dummies: public non-profit, private non-profit, and private for-profit.  We have created these before.*
+```{r}
+data2$public <- ifelse(data2$control == "1",1,0)
+data2$private_non_profit <- ifelse(data2$control == "2",1,0)
+data2$private_for_profit <- ifelse(data2$control == "3",1,0)
+```
+
+*Now try running a regression with median debt as the dependent variable, and public, private non-profit, median family income, total cost, percent pell and percent federal loans as the independent variables.*
+```{r}
+mod<-lm(debt_mdn ~ public + private_non_profit + md_faminc + costt4_a + pctpell + pctfloan,
+        data=data2)
+summary(mod)
+```
+
+*Next, try adding in the private for-profit variable.  What happens?  Why?*
+```{r}
+mod1<-lm(debt_mdn ~ public + private_non_profit + private_for_profit + md_faminc + costt4_a + pctpell + pctfloan,
+        data=data2)
+summary(mod1)
+```
+
+*Try removing public, but leaving private for-profit in the model.  How does this model compare to the first one?*
+```{r}
+mod2<-lm(debt_mdn ~ private_non_profit + private_for_profit + md_faminc + costt4_a + pctpell + pctfloan,
+        data=data2)
+summary(mod2)
+```
+
+*What is the predicted median debt for all three types of schools, when all other variables are at 0?*
+
+*Is the predicted slope the same for all three types of schools?*
+
+
+# Interaction Terms
+
+*Create a new "private" dummy variable, that includes both non-profit and for-profit private schools as 1, and public schools as 0.*
+```{r}
+data2$private <- ifelse(data2$public == 0,1,0)
+```
+
+*Recode admission rate so that it ranges from 0-100, rather than 0 to 1.* 
+```{r}
+data2$pct_adm_rate <- 100*data2$adm_rate
+```
+
+*First run an additive model, using cost as the dependent variable, and private, SAT average, admission rate, average faculty salaries, and the number of undergradates as independent variables.*
+```{r}
+mod3<-lm(costt4_a ~ private + sat_avg + pct_adm_rate + avgfacsal + ugds, data=data2)
+summary(mod3)
+```
+
+*How would you interpret the results for private and SAT average?*
+
+*Next, make an interaction term (a new variable) to denote private school SAT averages, which you get by multiplying the private variable and SAT averages.*
+```{r}
+data2$sat_private <- data2$sat_avg*data2$private_for_profit
+```
+
+*What would you expect to happen with this interaction term?*
+
+*Now run the interactive model.  It should be the same as the additive model, but add the private school-SAT average interaction variable in.*
+```{r}
+mod4<-lm(costt4_a ~ private + sat_avg + sat_private + pct_adm_rate + avgfacsal + ugds, data=data2)
+summary(mod4)
+```
+*Put them both in the same stargazer table, so that you can compare the results side by side.  Just use `stargazer(model1, model2)`.*
+```{r,results='asis'}
+library(stargazer)
+stargazer(mod3,mod4)
+```
+
+*How would you interpret the results of the interactive model?  What do they mean?  How is it different from the additive model?*
+
+*In LaTeX math mode, try writing out the rergression equation for private schools, substituting in the coefficients and variable names.  (For examples, see the first few slides of the interactive hypotheses section and the final output on the slide with the graph of both regression lines.)*
+
+*Now write the same equation but for public schools.*

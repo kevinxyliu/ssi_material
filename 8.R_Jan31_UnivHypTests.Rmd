@@ -1,0 +1,100 @@
+---
+title: "Univariate Hypothesis Tests"
+author: "Lauren K. Perez"
+date: "1/31/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Univariate Hypothesis Tests
+
+## Example: Polling
+
+**As you did last time, go to [Polling Report](www.pollingreport.com) and find a poll that looks interesting to you.  You should choose one where you can reasonably collapse the responses into two categories.** 
+
+**What would the appropriate null and alternative hypotheses?**
+
+**Find the test statistic.**
+
+**Can you reject the null?**
+
+**How confident are you?**
+
+## Example: College Scorecard Data
+
+**Open the data and clean the `adm_rate` and `sat_avg` variables.**
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+```
+
+**As we did last time, make a vector of the admission rate data that includes only the non-missing data.  Then set the seed to 100 and draw 10,000 samples of 100.  Store the outcomes in a vector.**
+```{r}
+nonNA_adm_rate <- data2$adm_rate[which(!is.na(data2$adm_rate))]
+set.seed(100)
+sample_adm_rate<-rep(NA,10000)
+sam<-rep(NA,10000)
+for (f in 1:10000) {
+  sam<-sample(nonNA_adm_rate,100,replace=TRUE)
+  sample_adm_rate[f]<-mean(sam)
+}
+```
+
+**For each of the samples, calculate the z-score if our null hypothesis is that the average admission rate is 69.1% (the actual population mean).  You should use the standard error based on the sampling distribution (rather than calculated from the population standard deviation).**
+```{r}
+set.seed(100)
+sd<-sd(sample_adm_rate)
+zscores<-rep(NA,10000)
+zscores<-(sample_adm_rate-0.691)/sd
+
+```
+
+To find how many of our samples had a mean within one standard error of both the population mean and the mean of the sampling distribution (since these are both .691), we can use the following code, where `zscores` is the vector of z-scores. We can then take the length of the vector `onese` to figure out how many of the samples were within one standard error of the mean.  You could divide by 10,000 to get the percentage.  Is it what we expect?
+
+```{r}
+onese <- zscores[(which(zscores<=1 & zscores>=-1))]
+  #this line of code takes all of the zscore values which are less than or equal to 1 AND greater than or equal to -1 and stores them in a new vector called onesd
+
+length(onese)
+```
+
+**Do the same thing for two and three standard errors.  Are the sample means distributed as you would expect?**
+```{r}
+twose <- zscores[(which(zscores<=2 & zscores>=-2))]
+length(twose)
+```
+```{r}
+threese <- zscores[(which(zscores<=3 & zscores>=-3))]
+length(threese)
+```
+
+**Print out the thirty-second observation of your sample means vector.  What is the z-score of this sample mean?**
+```{r}
+print(sample_adm_rate[32])
+print(zscores[32])
+```
+
+This seems like a pretty extreme sample mean. But how extreme is it?  You should already have some idea, based on the z-score. 
+
+To figure out the probability of getting a sample mean as low as this one if the null hypothesis is true (if our mean is the actual mean), we can use the following code (substitute in your z-score where it says zscore):
+
+```{r}
+(pnorm(print(zscores[32]))) #this calls for the probability under the normal curve of your z-score.  It is the same value you would get if you put this into a normal calculator or looked it up in a z-score table.  This is also the p-value! 
+```
+
+If we wanted to know what the probability of a sample mean as extreme as this one if the null hypothesis is true (if our mean is the actual mean), but including either one as high or as low as this one, we can use the following code:
+
+```{r}
+(2*pnorm(zscores[32])) #since there is now an equal probability of getting a number as high as this one is low, we double the result
+```
+
+If this had happened to be the only sample we drew, we would reject the null, even with 99% confidence.  In this case, we would have done so incorrectly, since we know that the null is correct! That will happen sometimes - in fact, the probability of doing so is the p-value (which are the probabilities you just calculated). 
+
+*Try doing this for a few more samples.  What are their p-values?*

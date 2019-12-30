@@ -1,0 +1,303 @@
+---
+title: "Feb 21 SSI II"
+date: "2/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Multivariate Regression
+
+*Start by opening the college scorecard data and cleaning it. The variables you will need are: `debt_mdn`, `md_faminc`, `costt4_a`, `pctpell`, `pctfloan`, `adm_rate`, `sat_avg`, `avgfacsal`, and `ugds`.  Apart from the last two, you should be able to copy and paste the cleaning instructions from previous R files (or that separate cleaning file I encourage you to make).*
+```{r}
+library(haven)
+data2<-read_dta("/Users/kevinxyliu/Desktop/CollegeScorecard1415_forR.dta")
+
+# clean up the data
+data2$opeid6[which(data2$opeid6=="NULL")]<-NA
+data2$instnm[which(data2$instnm=="NULL")]<-NA
+data2$city[which(data2$city=="NULL")]<-NA
+data2$stabbr[which(data2$stabbr=="NULL")]<-NA
+data2$accredagency[which(data2$accredagency=="NULL")]<-NA
+data2$hcm2[which(data2$hcm2=="NULL")]<-NA
+data2$main[which(data2$main=="NULL")]<-NA
+data2$numbranch[which(data2$numbranch=="NULL")]<-NA
+data2$preddeg[which(data2$preddeg=="NULL")]<-NA
+data2$highdeg[which(data2$highdeg=="NULL")]<-NA
+data2$control[which(data2$control=="NULL")]<-NA
+data2$menonly[which(data2$menonly=="NULL")]<-NA
+data2$womenonly[which(data2$womenonly=="NULL")]<-NA
+data2$adm_rate[which(data2$adm_rate=="NULL")]<-NA
+data2$relaffil[which(data2$relaffil=="NULL")]<-NA
+data2$actcm25[which(data2$actcm25=="NULL")]<-NA
+data2$actcm75[which(data2$actcm75=="NULL")]<-NA
+data2$sat_avg[which(data2$sat_avg=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_white[which(data2$ugds_white=="NULL")]<-NA
+data2$ugds[which(data2$ugds=="NULL")]<-NA
+data2$ugds_black[which(data2$ugds_black=="NULL")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="NULL")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="NULL")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="NULL")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="NULL")]<-NA
+data2$costt4_a[which(data2$costt4_a=="NULL")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="NULL")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="NULL")]<-NA
+data2$inexpfte[which(data2$inexpfte=="NULL")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="NULL")]<-NA
+data2$pctpell[which(data2$pctpell=="NULL")]<-NA
+data2$c200_4[which(data2$c200_4=="NULL")]<-NA
+data2$c200_l4[which(data2$c200_l4=="NULL")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="NULL")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="NULL")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="NULL")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="NULL")]<-NA
+data2$pctfloan[which(data2$pctfloan=="NULL")]<-NA
+data2$ug25abv[which(data2$ug25abv=="NULL")]<-NA
+data2$cdr3[which(data2$cdr3=="NULL")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="NULL")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="NULL")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="NULL")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="NULL")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="NULL")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="NULL")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="NULL")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="NULL")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="NULL")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="NULL")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="NULL")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="NULL")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="NULL")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="NULL")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="NULL")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="NULL")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="NULL")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="NULL")]<-NA
+data2$faminc[which(data2$faminc=="NULL")]<-NA
+data2$md_faminc[which(data2$md_faminc=="NULL")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="NULL")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="NULL")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="NULL")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="NULL")]<-NA
+data2$c100_4[which(data2$c100_4=="NULL")]<-NA
+data2$c100_l4[which(data2$c100_l4=="NULL")]<-NA
+data2$ugds_men[which(data2$ugds_men=="NULL")]<-NA
+data2$ugds_women[which(data2$ugds_women=="NULL")]<-NA
+data2$opeid6[which(data2$opeid6=="PrivacySuppressed")]<-NA
+data2$instnm[which(data2$instnm=="PrivacySuppressed")]<-NA
+data2$city[which(data2$city=="PrivacySuppressed")]<-NA
+data2$stabbr[which(data2$stabbr=="PrivacySuppressed")]<-NA
+data2$accredagency[which(data2$accredagency=="PrivacySuppressed")]<-NA
+data2$hcm2[which(data2$hcm2=="PrivacySuppressedL")]<-NA
+data2$main[which(data2$main=="PrivacySuppressed")]<-NA
+data2$numbranch[which(data2$numbranch=="PrivacySuppressed")]<-NA
+data2$preddeg[which(data2$preddeg=="PrivacySuppressed")]<-NA
+data2$highdeg[which(data2$highdeg=="PrivacySuppressed")]<-NA
+data2$control[which(data2$control=="PrivacySuppressed")]<-NA
+data2$menonly[which(data2$menonly=="PrivacySuppressed")]<-NA
+data2$womenonly[which(data2$womenonly=="PrivacySuppressed")]<-NA
+data2$adm_rate[which(data2$adm_rate=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="PrivacySuppressed")]<-NA
+data2$actcm25[which(data2$actcm25=="PrivacySuppressed")]<-NA
+data2$actcm75[which(data2$actcm75=="PrivacySuppressed")]<-NA
+data2$sat_avg[which(data2$sat_avg=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_white[which(data2$ugds_white=="PrivacySuppressed")]<-NA
+data2$ugds[which(data2$ugds=="PrivacySuppressed")]<-NA
+data2$ugds_black[which(data2$ugds_black=="PrivacySuppressed")]<-NA
+data2$ugds_hisp[which(data2$ugds_hisp=="PrivacySuppressed")]<-NA
+data2$ugds_asian[which(data2$ugds_asian=="PrivacySuppressed")]<-NA
+data2$npt4_pub[which(data2$npt4_pub=="PrivacySuppressed")]<-NA
+data2$npt4_priv[which(data2$npt4_priv=="PrivacySuppressed")]<-NA
+data2$costt4_a[which(data2$costt4_a=="PrivacySuppressed")]<-NA
+data2$tuitionfee_in[which(data2$tuitionfee_in=="PrivacySuppressed")]<-NA
+data2$tuitionfee_out[which(data2$tuitionfee_out=="PrivacySuppressed")]<-NA
+data2$inexpfte[which(data2$inexpfte=="PrivacySuppressed")]<-NA
+data2$avgfacsal[which(data2$avgfacsal=="PrivacySuppressed")]<-NA
+data2$pctpell[which(data2$pctpell=="PrivacySuppressed")]<-NA
+data2$c200_4[which(data2$c200_4=="PrivacySuppressed")]<-NA
+data2$c200_l4[which(data2$c200_l4=="PrivacySuppressed")]<-NA
+data2$ret_ft4[which(data2$ret_ft4=="PrivacySuppressed")]<-NA
+data2$ret_ftl4[which(data2$ret_ftl4=="PrivacySuppressed")]<-NA
+data2$ret_pt4[which(data2$ret_pt4=="PrivacySuppressed")]<-NA
+data2$ret_ptl4[which(data2$ret_ptl4=="PrivacySuppressed")]<-NA
+data2$pctfloan[which(data2$pctfloan=="PrivacySuppressed")]<-NA
+data2$ug25abv[which(data2$ug25abv=="PrivacySuppressed")]<-NA
+data2$cdr3[which(data2$cdr3=="PrivacySuppressed")]<-NA
+data2$rpy_1yr_rt[which(data2$rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_1yr_rt[which(data2$female_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_1yr_rt[which(data2$male_rpy_1yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_3yr_rt[which(data2$rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_3yr_rt[which(data2$female_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_3yr_rt[which(data2$male_rpy_3yr_rt=="PrivacySuppressed")]<-NA
+data2$rpy_5yr_rt[which(data2$rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$female_rpy_5yr_rt[which(data2$female_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$male_rpy_5yr_rt[which(data2$male_rpy_5yr_rt=="PrivacySuppressed")]<-NA
+data2$inc_pct_lo[which(data2$inc_pct_lo=="PrivacySuppressed")]<-NA
+data2$par_ed_pct_1stgen[which(data2$par_ed_pct_1stgen=="PrivacySuppressed")]<-NA
+data2$inc_pct_m1[which(data2$inc_pct_m1=="PrivacySuppressed")]<-NA
+data2$inc_pct_m2[which(data2$inc_pct_m2=="PrivacySuppressed")]<-NA
+data2$inc_pct_h1[which(data2$inc_pct_h1=="PrivacySuppressed")]<-NA
+data2$inc_pct_h2[which(data2$inc_pct_h2=="PrivacySuppressed")]<-NA
+data2$debt_mdn[which(data2$debt_mdn=="PrivacySuppressed")]<-NA
+data2$grad_debt_mdn[which(data2$grad_debt_mdn=="PrivacySuppressed")]<-NA
+data2$wdraw_debt_mdn[which(data2$wdraw_debt_mdn=="PrivacySuppressed")]<-NA
+data2$faminc[which(data2$faminc=="PrivacySuppressed")]<-NA
+data2$md_faminc[which(data2$md_faminc=="PrivacySuppressed")]<-NA
+data2$faminc_ind[which(data2$faminc_ind=="PrivacySuppressed")]<-NA
+data2$mn_earn_wne_p10[which(data2$mn_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$md_earn_wne_p10[which(data2$md_earn_wne_p10=="PrivacySuppressed")]<-NA
+data2$gt_25k_p10[which(data2$gt_25k_p10=="PrivacySuppressed")]<-NA
+data2$c100_4[which(data2$c100_4=="PrivacySuppressed")]<-NA
+data2$c100_l4[which(data2$c100_l4=="PrivacySuppressed")]<-NA
+data2$ugds_men[which(data2$ugds_men=="PrivacySuppressed")]<-NA
+data2$ugds_women[which(data2$ugds_women=="PrivacySuppressed")]<-NA
+data2$relaffil[which(data2$relaffil=="-2")]<-NA
+data2$preddeg[which(data2$preddeg=="0")]<-NA
+
+# convert data into numerics
+data2$opeid6<-as.numeric(data2$opeid6)
+data2$hcm2<-as.numeric(data2$hcm2)
+data2$main<-as.numeric(data2$main)
+data2$numbranch<-as.numeric(data2$numbranch)
+data2$preddeg<-as.numeric(data2$preddeg)
+data2$highdeg<-as.numeric(data2$highdeg)
+data2$control<-as.numeric(data2$control)
+data2$menonly<-as.numeric(data2$menonly)
+data2$womenonly<-as.numeric(data2$womenonly)
+data2$relaffil<-as.numeric(data2$relaffil)
+data2$adm_rate<-as.numeric(data2$adm_rate)
+data2$actcm25<-as.numeric(data2$actcm25)
+data2$actcm75<-as.numeric(data2$actcm75)
+data2$sat_avg<-as.numeric(data2$sat_avg)
+data2$ugds<-as.numeric(data2$ugds)
+data2$ugds_white<-as.numeric(data2$ugds_white)
+data2$ugds_black<-as.numeric(data2$ugds_black)
+data2$ugds_hisp<-as.numeric(data2$ugds_hisp)
+data2$ugds_asian<-as.numeric(data2$ugds_asian)
+data2$npt4_pub<-as.numeric(data2$npt4_pub)
+data2$npt4_priv<-as.numeric(data2$npt4_priv)
+data2$costt4_a<-as.numeric(data2$costt4_a)
+data2$tuitionfee_in<-as.numeric(data2$tuitionfee_in)
+data2$tuitionfee_out<-as.numeric(data2$tuitionfee_out)
+data2$tuitfte<-as.numeric(data2$tuitfte)
+data2$inexpfte<-as.numeric(data2$inexpfte)
+data2$avgfacsal<-as.numeric(data2$avgfacsal)
+data2$pctpell<-as.numeric(data2$pctpell)
+data2$c200_4<-as.numeric(data2$c200_4)
+data2$c200_l4<-as.numeric(data2$c200_l4)
+data2$ret_ft4<-as.numeric(data2$ret_ft4)
+data2$ret_ftl4<-as.numeric(data2$ret_ftl4)
+data2$ret_pt4<-as.numeric(data2$ret_pt4)
+data2$ret_ptl4<-as.numeric(data2$ret_ptl4)
+data2$pctfloan<-as.numeric(data2$pctfloan)
+data2$ug25abv<-as.numeric(data2$ug25abv)
+data2$cdr3<-as.numeric(data2$cdr3)
+data2$rpy_1yr_rt<-as.numeric(data2$rpy_1yr_rt)
+data2$female_rpy_1yr_rt<-as.numeric(data2$female_rpy_1yr_rt)
+data2$male_rpy_1yr_rt<-as.numeric(data2$male_rpy_1yr_rt)
+data2$rpy_3yr_rt<-as.numeric(data2$rpy_3yr_rt)
+data2$female_rpy_3yr_rt<-as.numeric(data2$female_rpy_3yr_rt)
+data2$male_rpy_3yr_rt<-as.numeric(data2$male_rpy_3yr_rt)
+data2$rpy_5yr_rt<-as.numeric(data2$rpy_5yr_rt)
+data2$female_rpy_5yr_rt<-as.numeric(data2$female_rpy_5yr_rt)
+data2$male_rpy_5yr_rt<-as.numeric(data2$male_rpy_5yr_rt)
+data2$inc_pct_lo<-as.numeric(data2$inc_pct_lo)
+data2$par_ed_pct_1stgen<-as.numeric(data2$par_ed_pct_1stgen)
+data2$inc_pct_m1<-as.numeric(data2$inc_pct_m1)
+data2$inc_pct_m2<-as.numeric(data2$inc_pct_m2)
+data2$inc_pct_h1<-as.numeric(data2$inc_pct_h1)
+data2$inc_pct_h2<-as.numeric(data2$inc_pct_h2)
+data2$debt_mdn<-as.numeric(data2$debt_mdn)
+data2$grad_debt_mdn<-as.numeric(data2$grad_debt_mdn)
+data2$wdraw_debt_mdn<-as.numeric(data2$wdraw_debt_mdn)
+data2$faminc<-as.numeric(data2$faminc)
+data2$md_faminc<-as.numeric(data2$md_faminc)
+data2$faminc_ind<-as.numeric(data2$faminc_ind)
+data2$mn_earn_wne_p10<-as.numeric(data2$mn_earn_wne_p10)
+data2$md_earn_wne_p10<-as.numeric(data2$md_earn_wne_p10)
+data2$gt_25k_p10<-as.numeric(data2$gt_25k_p10)
+data2$c100_4<-as.numeric(data2$c100_4)
+data2$c100_l4<-as.numeric(data2$c100_l4)
+data2$ugds_men<-as.numeric(data2$ugds_men)
+data2$ugds_women<-as.numeric(data2$ugds_women)
+```
+
+To run a multivariate regression, we use the lm() function.  The dependent variable goes first, then a "~", and then the independent variables separated by commas.  If you prefer not to use the dataset$variable notation, you can add the option ", data = datasetname" after the independent variables. 
+
+*Try running the regressions below and check that you get the same thing we went over in class.*
+
+```{r}
+  mod4 <- lm(debt_mdn ~ md_faminc + costt4_a, data=data2) 
+  summary(mod4)
+  
+  mod5 <- lm(debt_mdn ~ md_faminc + costt4_a + pctpell, data=data2)
+  summary(mod5)
+  
+  mod6 <- lm(debt_mdn ~ md_faminc + costt4_a + pctpell + pctfloan, data=data2)
+  summary(mod6)
+```
+
+*Next, try running the stargazer table below.  Note how to add labels to the variables to make them readable.  (You should do this from now on.)  If you want to use a "%" sign, you have to put two backslashes in front of it.*  
+
+```{r, results='asis'}
+library(stargazer)
+options(stargazer.comment = FALSE)
+
+stargazer(mod4, mod5, mod6,
+            title = "Factors Affecting Median Student Debt",
+            covariate.labels = c("Median Family Income", "Cost", 
+                                 "\\% w Pell Grants", "\\% w Federal Loans", "Constant"), 
+            dep.var.caption = "",
+            dep.var.labels.include = FALSE,
+            type = 'latex', header=FALSE)
+```
+
+*Now try running a model where you regress admission rate (adm_rate), SAT average (sat_avg), faculty salaries (avgfacsal), and undergraduate enrollment (ugds) on cost (costt4_a). Remember to clean the variables.*
+```{r}
+  mod1 <- lm(costt4_a ~ adm_rate + sat_avg, data=data2) 
+  summary(mod1)
+    mod2 <- lm(costt4_a ~ adm_rate + sat_avg + avgfacsal, data=data2) 
+  summary(mod2)
+  mod3 <- lm(costt4_a ~ adm_rate + sat_avg + avgfacsal + ugds, data=data2) 
+  summary(mod3)
+```
+
+*Make a "pretty" table using stargazer.  Include labels for the covariates.*
+```{r,results='asis'}
+library(stargazer)
+options(stargazer.comment = FALSE)
+
+stargazer(mod1, mod2, mod3,
+            title = "Factors Affecting the cost of college",
+            covariate.labels = c("Admission Rate", "SAT average", 
+                                 "Faculty Salaries", "Undergraduate Enrollment", "Constant"), 
+            dep.var.caption = "",
+            dep.var.labels.include = FALSE,
+            type = 'latex', header=FALSE)
+```
+
+*How would you interpret each of the beta coefficients, in terms of both size and significance?  Try varying the wording a bit (e.g. mixing up "on average", "predicted", and "expected").*
+
+*How would you interpret the alpha coefficient?*
+
+*How would you interpret the R-squared and adjusted R-squared?*
+
+*How would you interpret the F-statistic?*
+
+#Merging Data
+
+*Sometimes you will need to merge one data set with another.  To try this, let's try adding the "hbcu" variable for whether or not a school is a historically black college or university into the data.  Download this from Canvas. Then put the file path for it into the code below, where it says "filepath".  Then try merging it.  Look at both data sets individually, and check that the hbcu variable is now in your main data set.  If you have the data open as something other than CSdata, you also need to put the name of your dataset where it says "CSdata" in the merge() function.*
+
+```{r}
+CSminidata <- read.csv("/Users/kevinxyliu/Desktop/CSminidata-1.csv", row.names=1, stringsAsFactors=FALSE)
+newCSdata <- merge(data2, CSminidata, by = c("opeid6", "instnm", "city", "main"))
+```
+
+Since the mini data is a .csv file instead of a .dta file, you use read.csv().  In the options, you add row.names=1 so that it does not give you an extra column of row numbers.  (If you want to see what I mean, take that option out and run it.  You'll have an extra variable.)  I also set it to not import string variables as factor variables. 
+
+Then, in the merge command, you tell it to merge your existing dataset with the new dataset.  Then you tell it which variables to match the data on.  We tell it to match by `opeid6`, `name`, `city`, and `main`.  
+
+You may have noticed there are a few extra observations in the merged data set.  This occurs because there are a few duplicate observations by `opeid6`, `instnm`, `city`, and `main` and it matches each combination of those.  For example, "ITT Technical Institute-Madison" has locations in Madison, AL, Madison, WI, and Madison, MS.  If we were going to do more with this data, we would want to fix this issue.  
